@@ -8,6 +8,7 @@ public interface UserProfileService {
     UserProfile update(UserProfile userProfile);
 
     UserProfile getById(Long userProfileId);
-     UserProfile getProfileByuserId(Long userId);
+
+    UserProfile getProfileByuserId(Long userId);
 
 }

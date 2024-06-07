@@ -3,6 +3,7 @@ package com.JobPortal.ServiceImpl;
 import com.JobPortal.Model.User;
 import com.JobPortal.Model.UserProfile;
 import com.JobPortal.Repository.UserProfileRepository;
+import com.JobPortal.Request.ProfileRequest;
 import com.JobPortal.Service.UserProfileService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -14,6 +15,7 @@ public class UserProfileServiceImpl implements UserProfileService {
     private UserProfileRepository userProfileRepository;
     @Autowired
     private UserServiceImpl userService;
+
     @Override
     public UserProfile add(UserProfile userProfile) {
         return userProfileRepository.save(userProfile);
@@ -21,7 +23,7 @@ public class UserProfileServiceImpl implements UserProfileService {
 
     @Override
     public UserProfile update(UserProfile userProfile) {
-
+//        ProfileRequest profileRequest =
         return userProfileRepository.save(userProfile);
     }
 
@@ -33,7 +35,7 @@ public class UserProfileServiceImpl implements UserProfileService {
 
     @Override
     public UserProfile getProfileByuserId(Long userId) {
-        User user=userService.getUserById(userId);
+        User user = userService.getUserById(userId);
         UserProfile profile = user.getProfile();
         return profile;
     }

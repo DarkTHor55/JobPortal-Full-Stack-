@@ -10,7 +10,7 @@ import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Component;
 
 @Component
-public class JwtProvider  implements AuthenticationProvider {
+public class JwtProvider implements AuthenticationProvider {
     @Autowired
     private JwtUtils jwtUtils;
     @Autowired

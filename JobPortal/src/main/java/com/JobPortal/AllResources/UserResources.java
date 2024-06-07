@@ -7,6 +7,7 @@ import com.JobPortal.Execption.UserSaveFailedException;
 import com.JobPortal.Model.Address;
 import com.JobPortal.Model.User;
 import com.JobPortal.Model.UserProfile;
+import com.JobPortal.Model.UserSkill;
 import com.JobPortal.Request.LoginRequest;
 import com.JobPortal.Request.ProfileRequest;
 import com.JobPortal.Request.UserRequest;
@@ -16,6 +17,7 @@ import com.JobPortal.Response.UserResponse;
 import com.JobPortal.ServiceImpl.AddressServiceImpl;
 import com.JobPortal.ServiceImpl.UserProfileServiceImpl;
 import com.JobPortal.ServiceImpl.UserServiceImpl;
+import com.JobPortal.ServiceImpl.UserSkillsServiceImpl;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -42,18 +44,18 @@ import java.util.List;
 @Component
 public class UserResources {
     private final Logger LOG = LoggerFactory.getLogger(UserResponse.class);
-
     @Autowired
     private UserServiceImpl userService;
     @Autowired
     private AddressServiceImpl addressService;
     @Autowired
+    private UserSkillsServiceImpl userSkillsService;
+    @Autowired
     private JwtUtils jwtUtils;
     @Autowired
     private UserProfileServiceImpl userProfileService;
     @Autowired
-    private   AuthenticationManager  authenticationManager;
-
+    private AuthenticationManager authenticationManager;
 
     public ResponseEntity<UserResponse> registerUser(UserRequest request) throws OtpValidtionExection, EmailValidationExecption {
 
@@ -99,7 +101,7 @@ public class UserResources {
         user.setFirstName(request.getFirstName());
         user.setLastName(request.getLastName());
         user.setEmail(request.getEmail());
-        UserProfile newProfile=userProfileService.add(new UserProfile());
+        UserProfile newProfile = userProfileService.add(new UserProfile());
         user.setProfile(newProfile);
 
         User userResponse = userService.addUser(user);
@@ -125,7 +127,7 @@ public class UserResources {
         }
     }
 
-    public ResponseEntity<LoginResponse>loginUser(LoginRequest request) {
+    public ResponseEntity<LoginResponse> loginUser(LoginRequest request) {
         LOG.info("Received request for User Login");
         LoginResponse response = new LoginResponse();
 //        check request is not empty
@@ -136,11 +138,11 @@ public class UserResources {
             response.setSuccess(false);
             return new ResponseEntity<>(response, HttpStatus.BAD_REQUEST);
         }
-        User us=userService.login(request.getEmailId(),request.getPassword());
-        if(us==null){
+        User us = userService.login(request.getEmailId(), request.getPassword());
+        if (us == null) {
             response.setResponseMessage("Invalid input");
             response.setSuccess(false);
-            return new ResponseEntity<>(response,HttpStatus.BAD_REQUEST);
+            return new ResponseEntity<>(response, HttpStatus.BAD_REQUEST);
         }
 
         String jwtToken = null;
@@ -162,7 +164,7 @@ public class UserResources {
 
 //        user = this.userService.getUserByEmailIdAndRoleAndStatus(request.getEmailId(), request.getRole(),
 //                Constants.ActiveStatus.ACTIVE.value());
-        user=userService.getUserByEmailid(request.getEmailId());
+        user = userService.getUserByEmailid(request.getEmailId());
         System.out.println(user.getEmail());
         if (jwtToken != null) {
             response.setUser(user);
@@ -170,50 +172,48 @@ public class UserResources {
             response.setSuccess(true);
             response.setJwtToken(jwtToken);
             return new ResponseEntity<LoginResponse>(response, HttpStatus.OK);
-        }
-
-        else {
+        } else {
             response.setResponseMessage("Failed to login");
             response.setSuccess(false);
             return new ResponseEntity<LoginResponse>(response, HttpStatus.BAD_REQUEST);
         }
     }
 
-    public ResponseEntity<String> deleteUser(Long userId){
+    public ResponseEntity<String> deleteUser(Long userId) {
         boolean success = userService.removeUser(userId);
-        if(success){
-            return new ResponseEntity<>("User deleted successfully",HttpStatus.OK);
-        }else {
-            return new ResponseEntity<>("User not found in database",HttpStatus.NOT_FOUND);
+        if (success) {
+            return new ResponseEntity<>("User deleted successfully", HttpStatus.OK);
+        } else {
+            return new ResponseEntity<>("User not found in database", HttpStatus.NOT_FOUND);
         }
     }
-    public ResponseEntity<User> fetchUser(Long userId){
+
+    public ResponseEntity<User> fetchUser(Long userId) {
         User user = userService.getUserById(userId);
-        if(user == null){
+        if (user == null) {
             return new ResponseEntity<>(HttpStatus.NOT_FOUND);
         }
-        return new ResponseEntity<>(user,HttpStatus.OK);
+        return new ResponseEntity<>(user, HttpStatus.OK);
     }
-    public ResponseEntity<List<User>> fetchUserByRole(String role){
+
+    public ResponseEntity<List<User>> fetchUserByRole(String role) {
         List<User> users = userService.getUserByRole(role);
-        if(users.isEmpty()){
+        if (users.isEmpty()) {
             return new ResponseEntity<>(HttpStatus.NOT_FOUND);
         }
-        return new ResponseEntity<>(users,HttpStatus.OK);
+        return new ResponseEntity<>(users, HttpStatus.OK);
     }
-    public ResponseEntity<ProfileResponse>addProfileTOuser(ProfileRequest profile, String email) throws IOException, UserSaveFailedException {
-        ProfileResponse response=new ProfileResponse();
-        User user=userService.getUserByEmailid(email);
 
-
-        if (profile == null || email == null || profile.getResumeLink()== null
+    public ResponseEntity<ProfileResponse> addProfileTOuser(ProfileRequest profile, String email) throws IOException, UserSaveFailedException {
+        ProfileResponse response = new ProfileResponse();
+        User user = userService.getUserByEmailid(email);
+        if (profile == null || email == null || profile.getResumeLink() == null
                 || profile.getProfilePicLink() == null) {
             response.setSuccess(false);
             response.setResponse("Data not satisfied !!!  Please enter all  and correct details");
             response.setUser(user);
             return new ResponseEntity<>(response, HttpStatus.BAD_REQUEST);
         }
-
         if (user == null) {
             response.setResponse("User not found");
             response.setSuccess(false);
@@ -223,56 +223,97 @@ public class UserResources {
         preProfile.setId(preProfile.getId());
         preProfile.setBio(profile.getBio());
         preProfile.setWebsite(profile.getWebsite());
-        if(profile.getProfilePicLink() == null){
+        preProfile.setLinkedlnProfileLink(profile.getLinkedlnProfileLink());
+        if (profile.getProfilePicLink() == null) {
             preProfile.setProfilePic(defaultPic());
-        }else {
+        } else {
             preProfile.setProfilePic(convertImageToByteArray(profile.getProfilePicLink()));
         }
-
-        if(profile.getResumeLink() == null){
-            preProfile.setProfilePic(null);
-        }else {
-            preProfile.setProfilePic(convertFileToByteArray(profile.getResumeLink()));
+        if (profile.getResumeLink() == null) {
+            preProfile.setResume(null);
+        } else {
+            preProfile.setResume(convertFileToByteArray(profile.getResumeLink()));
         }
         preProfile.setGithubProfileLink(profile.getGithubProfileLink());
         preProfile.setSkills(null);
         preProfile.setEducations(null);
         preProfile.setWorkExperiences(null);
         UserProfile profile1 = userProfileService.update(preProfile);
-        if (profile1==null){
+        if (profile1 == null) {
             throw new UserSaveFailedException("Failed to update the User Profile");
-
         }
-        return new ResponseEntity<>(response,HttpStatus.OK);
+        return new ResponseEntity<>(response, HttpStatus.OK);
+    }
+
+    public ResponseEntity<UserResponse> updateSkill(UserSkill userSkill, String email) throws UserSaveFailedException {
+        User user = userService.getUserByEmailid(email);
+        UserProfile userProfile = user.getProfile();
+        UserResponse response = new UserResponse();
+        if (user == null) {
+            response.setResponseMessage("User Not found");
+            response.setSuccess(false);
+            return new ResponseEntity<>(response, HttpStatus.BAD_REQUEST);
+        }
+        if (userSkill.getSkill() == null || userSkill.getExperience() <= -1) {
+            response.setResponseMessage("Input are not valid");
+            response.setSuccess(false);
+            return new ResponseEntity<>(response, HttpStatus.BAD_REQUEST);
+        }
+        if (userSkill == null) {
+            response.setResponseMessage("Empty Skill is not valid");
+            response.setSuccess(false);
+            return new ResponseEntity<>(response, HttpStatus.BAD_REQUEST);
+        }
+        if (userProfile == null) {
+            response.setResponseMessage("No user FOund whoch this email");
+            response.setSuccess(false);
+            return new ResponseEntity<>(response, HttpStatus.BAD_REQUEST);
+        }
+        userSkill.setUserProfile(userProfile);
+        UserSkill userSkill1 = userSkillsService.updateUserSkill(userSkill,userProfile);
+        if (userSkill1 == null) {
+            throw new UserSaveFailedException("Failed to update the User Skill");
+        } else {
+            response.setSuccess(true);
+            response.setResponseMessage("Skill updated successfully");
+        }
+        return new ResponseEntity<>(response, HttpStatus.OK);
+
 
     }
-    private byte[] convertImageToByteArray(MultipartFile filePath){
-        byte[] imageData = null;
+
+
+    public static byte[] convertImageToByteArray(MultipartFile file) {
         try {
-            imageData = filePath.getBytes();
+            return file.getBytes();
         } catch (IOException e) {
+            System.out.println("Error yha h");
             e.printStackTrace();
+            return null;
         }
-        return imageData;
     }
 
-    public byte[] convertFileToByteArray(MultipartFile filePath) throws IOException {
-        return filePath.getBytes();
+    public static byte[] convertFileToByteArray(MultipartFile file) {
+        try {
+            return file.getBytes();
+        } catch (IOException e) {
+            System.out.println("Error yha h");
+            e.printStackTrace();
+
+            return null;
+        }
     }
-    public byte[] defaultPic() {
+
+    public static byte[] defaultPic() {
         String filePath = "src/main/resources/static/darkthor.png";
-
         Path path = Paths.get(filePath);
-        byte[] imageData = null;
         try {
-            Files.readAllBytes(path);
+            return Files.readAllBytes(path);
         } catch (IOException e) {
             e.printStackTrace();
+            return null;
         }
-        return imageData;
     }
-
-
 
 
 }

@@ -12,12 +12,13 @@ import lombok.Setter;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
+
 @Setter
 @Getter
 @NoArgsConstructor
 @AllArgsConstructor
 public class ProfileRequest {
-    private Long id;
+    private Long Userid;
     private String bio;
     private String website;
     private String linkedlnProfileLink;

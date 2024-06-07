@@ -25,8 +25,7 @@ import javax.crypto.SecretKey;
 @Component
 public class JwtUtils {
 
-    private static final  String SECRECT = createSecretKey();
-
+    private static final String SECRECT = createSecretKey();
 
 
     public String extractUsername(String token) {
@@ -66,9 +65,9 @@ public class JwtUtils {
         return Jwts.builder()
                 .setSubject(auth.getName())
                 .setIssuedAt(new Date(System.currentTimeMillis()))
-                .setExpiration(new Date(System.currentTimeMillis() +1000*60*24*7))
+                .setExpiration(new Date(System.currentTimeMillis() + 1000 * 60 * 24 * 7))
                 .claim("email", auth.getName())
-                .signWith(getKey(),SignatureAlgorithm.HS256)
+                .signWith(getKey(), SignatureAlgorithm.HS256)
                 .compact();
     }
 
@@ -79,7 +78,6 @@ public class JwtUtils {
         Base64.Encoder encoder = Base64.getUrlEncoder().withoutPadding();
         return encoder.encodeToString(secretBytes);
     }
-
 
 
     public SecretKey getKey() {

@@ -17,13 +17,12 @@ public class UserProfile {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
     private String bio;
-
-    private String website; // optional
+    private String website;
     @Lob
+    @Column(length = 1000000)
     private byte[] resume;
     private String linkedlnProfileLink;
     private String githubProfileLink;
-    // Establish a one-to-many relationship between UserProfile and UserSkills
     @OneToMany(mappedBy = "userProfile")
     private List<UserSkill> skills;
 
@@ -33,6 +32,7 @@ public class UserProfile {
     @OneToMany(mappedBy = "userProfile")
     private List<UserWorkExperience> workExperiences;
     @Lob
+    @Column(length = 1000000)
     private byte[] profilePic;
 
 

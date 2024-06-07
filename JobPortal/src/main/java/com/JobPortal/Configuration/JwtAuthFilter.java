@@ -22,24 +22,25 @@ public class JwtAuthFilter extends OncePerRequestFilter {
     private JwtUtils jwtUtils;
     @Autowired
     private CustomUserDetailsService userDetailsService;
+
     @Override
-    protected void doFilterInternal(@NonNull HttpServletRequest request,@NonNull  HttpServletResponse response,@NonNull  FilterChain filterChain) throws ServletException, IOException {
+    protected void doFilterInternal(@NonNull HttpServletRequest request, @NonNull HttpServletResponse response, @NonNull FilterChain filterChain) throws ServletException, IOException {
         if (request.getServletPath().contains("/api/user/")) {
             filterChain.doFilter(request, response);
             return;
         }
         String authHeader = request.getHeader("Authorization");
         String token = null;
-        String email=null;
-        System.out.println(authHeader+"do filter");
-        if (authHeader == null ||!authHeader.startsWith("Bearer ")) {
+        String email = null;
+        System.out.println(authHeader + "do filter");
+        if (authHeader == null || !authHeader.startsWith("Bearer ")) {
             filterChain.doFilter(request, response);
             return;
         }
         token = authHeader.substring(7);
         email = jwtUtils.extractUsername(token);
-        if (authHeader != null ) {
-            System.out.println(authHeader+"do filter");
+        if (authHeader != null) {
+            System.out.println(authHeader + "do filter");
             System.out.println(token);
             email = jwtUtils.extractUsername(token);
             System.out.println(email);

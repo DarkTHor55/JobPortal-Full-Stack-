@@ -15,11 +15,11 @@ public class CustomUserDetails implements UserDetails {
     private String password;
     private List<GrantedAuthority> authorities;
 
-//    here we extract email and password  and creating a list where authorities will be added
+    //    here we extract email and password  and creating a list where authorities will be added
 //
     public CustomUserDetails(User user) {
-        email=user.getEmail();
-        password=user.getPassword();
+        email = user.getEmail();
+        password = user.getPassword();
 
         authorities = new ArrayList<>();
 //here we seprate the authorities role in array list
@@ -28,7 +28,6 @@ public class CustomUserDetails implements UserDetails {
             authorities.add(new SimpleGrantedAuthority(role));
         }
     }
-
 
 
     @Override
@@ -45,6 +44,7 @@ public class CustomUserDetails implements UserDetails {
     public String getUsername() {
         return email;
     }
+
     @Override
     public boolean isAccountNonExpired() {
         return true;

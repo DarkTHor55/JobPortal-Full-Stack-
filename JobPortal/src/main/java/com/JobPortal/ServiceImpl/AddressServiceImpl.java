@@ -10,6 +10,7 @@ import org.springframework.stereotype.Service;
 public class AddressServiceImpl implements AddressService {
     @Autowired
     private AddressRepository addressRepository;
+
     @Override
     public Address addUserAddress(Address address) {
         return addressRepository.save(address);

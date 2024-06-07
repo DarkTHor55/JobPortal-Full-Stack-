@@ -1,4 +1,5 @@
 package com.JobPortal.Configuration;
+
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.AuthenticationProvider;
 import org.springframework.security.authentication.dao.DaoAuthenticationProvider;
@@ -29,6 +30,7 @@ public class SecurityConfig {
     public UserDetailsService userDetailsService() {
         return new CustomUserDetailsService();
     }
+
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
 
@@ -38,10 +40,10 @@ public class SecurityConfig {
 //                 this APIs are for Login and Register
                 auth -> auth.requestMatchers("/api/user/**", "/api/user/register").permitAll()
                         .anyRequest().authenticated()
-                );
+        );
 
         http.sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS));
-        http.cors(cors ->cors.configurationSource(apiConfigurationSource()) );
+        http.cors(cors -> cors.configurationSource(apiConfigurationSource()));
         return http.build();
 
     }
@@ -49,7 +51,7 @@ public class SecurityConfig {
     private CorsConfigurationSource apiConfigurationSource() {
         CorsConfiguration configuration = new CorsConfiguration();
         configuration.setAllowedOrigins(Arrays.asList("http://localhost:3000/", "https://localhost:8080"));
-        configuration.setAllowedMethods(Arrays.asList("GET", "POST", "PUT", "DELETE","post","get"));
+        configuration.setAllowedMethods(Arrays.asList("GET", "POST", "PUT", "DELETE", "post", "get"));
         configuration.setExposedHeaders(Arrays.asList("Authorization"));
         configuration.setAllowCredentials(true);
         configuration.setAllowedHeaders(Arrays.asList("*"));
@@ -63,9 +65,10 @@ public class SecurityConfig {
 
 
     @Bean
-    public PasswordEncoder passwordEncoder(){
+    public PasswordEncoder passwordEncoder() {
         return new BCryptPasswordEncoder();
     }
+
     @Bean
     public AuthenticationProvider authenticationProvider() {
         DaoAuthenticationProvider authenticationProvider = new DaoAuthenticationProvider();

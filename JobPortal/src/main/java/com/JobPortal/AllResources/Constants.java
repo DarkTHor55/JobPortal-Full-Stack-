@@ -14,6 +14,7 @@ public class Constants {
             return this.status;
         }
     }
+
     public enum UserRole {
         ROLE_EMPLOYEE("Employee"), ROLE_ADMIN("Admin"), ROLE_EMPLOYER("Employer");
 
@@ -27,6 +28,7 @@ public class Constants {
             return this.role;
         }
     }
+
     public enum UserProfileUpdateType {
         UPDATE_DETAIL("UpdateDetail"),
         UPDATE_SKILLS("UpdateSkill"),

@@ -1,13 +1,14 @@
 package com.JobPortal.Controller;
 
 import com.JobPortal.AllResources.UserResources;
-import com.JobPortal.Configuration.JwtUtils;
+import com.JobPortal.Configuration.*;
 import com.JobPortal.Execption.EmailValidationExecption;
 import com.JobPortal.Execption.OtpValidtionExection;
 import com.JobPortal.Execption.UserSaveFailedException;
 import com.JobPortal.Model.Address;
 import com.JobPortal.Model.User;
 import com.JobPortal.Model.UserProfile;
+import com.JobPortal.Model.UserSkill;
 import com.JobPortal.Repository.AddressRepository;
 import com.JobPortal.Request.LoginRequest;
 import com.JobPortal.Request.ProfileRequest;
@@ -22,6 +23,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
 import java.util.Date;
@@ -38,6 +40,7 @@ public class UserController {
     private AddressServiceImpl addressService;
     @Autowired
     private UserServiceImpl userService;
+
     @PostMapping("/register")
     public ResponseEntity<UserResponse> registerUser(@RequestBody UserRequest request) throws OtpValidtionExection, EmailValidationExecption {
         return userResources.registerUser(request);
@@ -47,25 +50,41 @@ public class UserController {
     public ResponseEntity<LoginResponse> loginUser(@RequestBody LoginRequest request) throws OtpValidtionExection, EmailValidationExecption {
         return userResources.loginUser(request);
     }
+
     @DeleteMapping("/delete/{userId}")
-    public ResponseEntity<String> deleteUser(@PathVariable Long userId)  {
+    public ResponseEntity<String> deleteUser(@PathVariable Long userId) {
         return userResources.deleteUser(userId);
     }
 
     @GetMapping("/fetch")
-    public ResponseEntity<User>fetchUser(@RequestBody Long userId) {
+    public ResponseEntity<User> fetchUser(@RequestBody Long userId) {
         return userResources.fetchUser(userId);
     }
+
     @GetMapping("/fetch/role-wise")
-    public ResponseEntity<List<User>>fetchUserByRole(@RequestBody String role) {
+    public ResponseEntity<List<User>> fetchUserByRole(@RequestBody String role) {
         return userResources.fetchUserByRole(role);
     }
-    @PostMapping("/profile")
-    public ResponseEntity<ProfileResponse> addUserAddress(@RequestBody ProfileRequest profile, @RequestHeader("authorization") String jwt) throws IOException, UserSaveFailedException {
-        jwt=jwt.substring(7);
-        String email=jwtUtils.extractUsername(jwt);
-        return userResources.addProfileTOuser(profile,email);
 
+    @PostMapping("/profile")
+    public ResponseEntity<ProfileResponse> addUserAddress(@RequestParam("bio") String bio, @RequestParam("website") String website, @RequestParam("linkedlnProfileLink") String linkedlnProfileLink, @RequestParam("githubProfileLink") String githubProfileLink, @RequestParam("resumeLink") MultipartFile resumeLink, @RequestParam("profilePicLink") MultipartFile profilePicLink, @RequestHeader("authorization") String jwt) throws IOException, UserSaveFailedException {
+        ProfileRequest profile = new ProfileRequest();
+        profile.setBio(bio);
+        profile.setWebsite(website);
+        profile.setProfilePicLink(profilePicLink);
+        profile.setLinkedlnProfileLink(linkedlnProfileLink);
+        profile.setGithubProfileLink(githubProfileLink);
+        profile.setResumeLink(resumeLink);
+        jwt = jwt.substring(7);
+        String email = jwtUtils.extractUsername(jwt);
+        return userResources.addProfileTOuser(profile, email);
+    }
+
+    @PostMapping("/updateSkill")
+    public ResponseEntity<UserResponse> updateSkill(@RequestBody UserSkill userSkill, @RequestHeader("authorization") String jwt) throws UserSaveFailedException {
+        jwt = jwt.substring(7);
+        String email = jwtUtils.extractUsername(jwt);
+        return userResources.updateSkill(userSkill, email);
 
     }
 

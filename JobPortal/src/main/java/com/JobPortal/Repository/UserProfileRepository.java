@@ -8,5 +8,5 @@ import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
 @EnableJpaRepositories
-public interface UserProfileRepository extends JpaRepository<UserProfile ,Long> {
+public interface UserProfileRepository extends JpaRepository<UserProfile, Long> {
 }

@@ -24,27 +24,27 @@ public class UserServiceImpl implements UserService {
     private PasswordEncoder passwordEncoder;
     @Autowired
     private EmailSenderService emailSenderService;
-    public static int  otp=randomNumber();
+    public static int otp = randomNumber();
 
     @Override
     public User addUser(User user) throws EmailValidationExecption, OtpValidtionExection {
 
         // Email validation
-        boolean emailAlreadyExists=false;
-        boolean validEmail=false;
-        if(isEmailExits(user.getEmail())){
-            emailAlreadyExists=true;
+        boolean emailAlreadyExists = false;
+        boolean validEmail = false;
+        if (isEmailExits(user.getEmail())) {
+            emailAlreadyExists = true;
         }
         String email = user.getEmail();
-        if(!emailAlreadyExists){
+        if (!emailAlreadyExists) {
             int countDot = 0;
-            for (int i = 0; i < email.length()-3; i++) {
+            for (int i = 0; i < email.length() - 3; i++) {
                 if (email.charAt(i) == '.') {
-                    System.out.println(i+"................................................................"+email.length());
-                    if (email.charAt(i + 1) == 'c' && email.charAt(i + 2) == 'o' && email.charAt(i + 3) == 'm'&&email.length()==i+4) {
-                        System.out.println(email.charAt(i+1)+"........."+email.charAt(i+2)+"........................."+email.charAt(i+3)+"..............................");
+                    System.out.println(i + "................................................................" + email.length());
+                    if (email.charAt(i + 1) == 'c' && email.charAt(i + 2) == 'o' && email.charAt(i + 3) == 'm' && email.length() == i + 4) {
+                        System.out.println(email.charAt(i + 1) + "........." + email.charAt(i + 2) + "........................." + email.charAt(i + 3) + "..............................");
 //                            if(isEmailExits(user.getEmail())){   // y check nhi hoga kuki mere pas itne email nhi h
-                                    validEmail=true;
+                        validEmail = true;
                         break;
 //                            }
 
@@ -58,62 +58,64 @@ public class UserServiceImpl implements UserService {
 
                 }
             }
-            if (!validEmail){
+            if (!validEmail) {
                 throw new IllegalArgumentException("Email not valid ");
             }
             String subject = "Your OTP";
             String body = "Your OTP is: " + otp + ". Don't share your OTP with anyone.";
-            emailSenderService.sendEmail(email,subject,body,otp);
+            emailSenderService.sendEmail(email, subject, body, otp);
             Scanner scanner = new Scanner(System.in);
-            int checkOtp=scanner.nextInt();
-            if(checkOtp!=otp){
+            int checkOtp = scanner.nextInt();
+            if (checkOtp != otp) {
                 throw new OtpValidtionExection("OTP is not valid");
             }
-        }else {
-            throw  new EmailValidationExecption("Email already exists");
+        } else {
+            throw new EmailValidationExecption("Email already exists");
         }
 
         //Password Encrytption
         user.setPassword(passwordEncoder.encode(user.getPassword()));
 
         // Phone number validation
-        Long phoneNumber=user.getPhoneNumber();
+        Long phoneNumber = user.getPhoneNumber();
         String phoneNumberStr = Long.toString(phoneNumber);
-        if(phoneNumberStr.length()!=10){
+        if (phoneNumberStr.length() != 10) {
             if (phoneNumber < 1000000000L || phoneNumber > 9999999999L) {
                 throw new IllegalArgumentException("Phone number must be between 1000000000 and 9999999999");
             }
             throw new IllegalArgumentException("Phone number must be of 10 digit");
         }
         // Role validation
-        String userRole=user.getRole();
-        if(userRole==null){
+        String userRole = user.getRole();
+        if (userRole == null) {
             user.setRole("USER");
         }
 
         //Registration date Validation
-        String registrationDate=user.getRegistrationDate();
-        if(registrationDate==null){
+        String registrationDate = user.getRegistrationDate();
+        if (registrationDate == null) {
             user.setRegistrationDate(new Date().toString());
         }
 
         //Status Validation
-        String status=user.getStatus();
-        if(status==null){
+        String status = user.getStatus();
+        if (status == null) {
             user.setStatus("ACTIVE");
         }
         return userRepository.save(user);
     }
+
     private boolean isEmailExits(String email) {
-        List<User> users=userRepository.findAll();
-        for(User user:users){
-            if(user.getEmail().equals(email)){
+        List<User> users = userRepository.findAll();
+        for (User user : users) {
+            if (user.getEmail().equals(email)) {
                 return true;
             }
         }
         return false;
     }
-    public static int randomNumber(){
+
+    public static int randomNumber() {
         Random random = new Random();
         int min = 1000;
         int max = 9999;
@@ -121,7 +123,7 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public User updateUser(String Email,User user) throws OtpValidtionExection, EmailValidationExecption, PasswordValidationExecption {
+    public User updateUser(String Email, User user) throws OtpValidtionExection, EmailValidationExecption, PasswordValidationExecption {
         User oldUser = userRepository.findByEmail(Email);
         // Email validation
         boolean emailAlreadyExists = false;
@@ -157,8 +159,8 @@ public class UserServiceImpl implements UserService {
             int checkOtp = scanner.nextInt();
             if (checkOtp != otp) {
                 throw new OtpValidtionExection("OTP is not valid");
-            }else {
-                oldUser.setEmail( user.getEmail());
+            } else {
+                oldUser.setEmail(user.getEmail());
             }
         } else {
             throw new EmailValidationExecption("Email already exists");
@@ -173,12 +175,12 @@ public class UserServiceImpl implements UserService {
         }
         //number
         // Phone number validation
-        Long phoneNumber=user.getPhoneNumber();
+        Long phoneNumber = user.getPhoneNumber();
         String phoneNumberStr = Long.toString(phoneNumber);
-        if(phoneNumberStr.length()!=10){
+        if (phoneNumberStr.length() != 10) {
             if (phoneNumber < 1000000000L && phoneNumber > 9999999999L) {
                 oldUser.setPhoneNumber(user.getPhoneNumber());
-            }else {
+            } else {
                 throw new IllegalArgumentException("Phone number must be between 1000000000 and 9999999999");
 
             }
@@ -187,12 +189,12 @@ public class UserServiceImpl implements UserService {
         }
         // Role validation
         // role Not be changed directly due to security issues
-        if(!user.getRole().equals(oldUser.getRole())){
+        if (!user.getRole().equals(oldUser.getRole())) {
             throw new IllegalArgumentException("Role Not be changed directly due to security issues");
         }
         //Status Validation
-        String status=user.getStatus();
-        if(status==null){
+        String status = user.getStatus();
+        if (status == null) {
             oldUser.setStatus("ACTIVE");
         }
         return userRepository.save(oldUser);
@@ -200,14 +202,15 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public boolean removeUser(Long userId) {
-        User user=userRepository.findById(userId).orElseThrow(null);
+        User user = userRepository.findById(userId).orElseThrow(null);
 
-        if (user!=null){
+        if (user != null) {
             userRepository.delete(user);
             return true;
         }
         return false;
     }
+
     @Override
     public User getUserByEmailAndStatus(String emailId, String status) {
         return userRepository.findByEmailAndStatus(emailId, status);
@@ -228,7 +231,7 @@ public class UserServiceImpl implements UserService {
 
         User user = this.userRepository.findById(userId).orElseThrow();
 
-      return user;
+        return user;
 
     }
 
@@ -245,8 +248,8 @@ public class UserServiceImpl implements UserService {
     @Override
     public User login(String email, String password) {
         User user = userRepository.findByEmail(email);
-        if(user!=null){
-            if(passwordEncoder.matches(password,user.getPassword())){
+        if (user != null) {
+            if (passwordEncoder.matches(password, user.getPassword())) {
                 return user;
             }
         }
