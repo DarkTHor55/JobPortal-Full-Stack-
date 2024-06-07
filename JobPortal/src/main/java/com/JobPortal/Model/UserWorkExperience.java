@@ -11,22 +11,15 @@ import lombok.Setter;
 @Table(name = "user_work_experience")
 public class UserWorkExperience {
     @Id
-    @Column(name = "id", nullable = false)
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
-
     private double experience;
-
     private String jobPosition;
-
     private String company;
-
     private String startDate;
-
     private String endDate;
-
     @Transient
-    private int userId;
-
+    private Long userId;
     @JsonIgnore
     @ManyToOne
     @JoinColumn(name = "userProfile_id")

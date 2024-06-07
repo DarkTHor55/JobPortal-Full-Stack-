@@ -11,7 +11,7 @@ import lombok.Setter;
 @Table(name = "user_education")
 public class UserEducation {
     @Id
-    @Column(name = "id", nullable = false)
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
     private String degree;
@@ -23,7 +23,7 @@ public class UserEducation {
     private String endDate;
 
     @Transient
-    private int userId;
+    private Long userId;
 
     @JsonIgnore
     @ManyToOne

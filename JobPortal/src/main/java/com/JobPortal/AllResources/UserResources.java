@@ -4,23 +4,22 @@ import com.JobPortal.Configuration.JwtUtils;
 import com.JobPortal.Execption.EmailValidationExecption;
 import com.JobPortal.Execption.OtpValidtionExection;
 import com.JobPortal.Execption.UserSaveFailedException;
-import com.JobPortal.Model.Address;
-import com.JobPortal.Model.User;
-import com.JobPortal.Model.UserProfile;
-import com.JobPortal.Model.UserSkill;
+import com.JobPortal.Model.*;
+import com.JobPortal.Repository.UserRepository;
+import com.JobPortal.Repository.UserWorkExerienceRepository;
 import com.JobPortal.Request.LoginRequest;
 import com.JobPortal.Request.ProfileRequest;
 import com.JobPortal.Request.UserRequest;
 import com.JobPortal.Response.LoginResponse;
 import com.JobPortal.Response.ProfileResponse;
 import com.JobPortal.Response.UserResponse;
-import com.JobPortal.ServiceImpl.AddressServiceImpl;
-import com.JobPortal.ServiceImpl.UserProfileServiceImpl;
-import com.JobPortal.ServiceImpl.UserServiceImpl;
-import com.JobPortal.ServiceImpl.UserSkillsServiceImpl;
+import com.JobPortal.ServiceImpl.*;
+import jakarta.servlet.http.HttpServletResponse;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.cglib.beans.BeanMap;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -37,6 +36,7 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
@@ -44,6 +44,8 @@ import java.util.List;
 @Component
 public class UserResources {
     private final Logger LOG = LoggerFactory.getLogger(UserResponse.class);
+    @Autowired
+    private UserWorkExperienceServiceImpl userWorkExperienceService;
     @Autowired
     private UserServiceImpl userService;
     @Autowired
@@ -56,6 +58,10 @@ public class UserResources {
     private UserProfileServiceImpl userProfileService;
     @Autowired
     private AuthenticationManager authenticationManager;
+    @Autowired
+    private UserEducationServiceImpl userEducationService;
+    @Autowired
+    private UserRepository userRepository;
 
     public ResponseEntity<UserResponse> registerUser(UserRequest request) throws OtpValidtionExection, EmailValidationExecption {
 
@@ -242,6 +248,9 @@ public class UserResources {
         if (profile1 == null) {
             throw new UserSaveFailedException("Failed to update the User Profile");
         }
+        response.setResponse("Updated Profile");
+        response.setUser(user);
+        response.setSuccess(true);
         return new ResponseEntity<>(response, HttpStatus.OK);
     }
 
@@ -269,6 +278,7 @@ public class UserResources {
             response.setSuccess(false);
             return new ResponseEntity<>(response, HttpStatus.BAD_REQUEST);
         }
+
         userSkill.setUserProfile(userProfile);
         UserSkill userSkill1 = userSkillsService.updateUserSkill(userSkill,userProfile);
         if (userSkill1 == null) {
@@ -282,7 +292,112 @@ public class UserResources {
 
     }
 
+    public ResponseEntity<UserResponse>updateWorkExperience(UserWorkExperience experience,String email){
+        User user=userService.getUserByEmailid(email);
+        UserProfile profile=user.getProfile();
+        UserResponse response=new UserResponse();
+        if(experience == null){
+            response.setSuccess(false);
+            response.setResponseMessage("Empty input");
+            return new ResponseEntity<>(response,HttpStatus.BAD_REQUEST);
+        }
+        if (experience.getCompany() == null||experience.getJobPosition()==null||experience.getStartDate()==null||experience.getEndDate()==null){
+            System.out.println(experience.getExperience());
+            System.out.println(experience.getCompany());
+            System.out.println(experience.getJobPosition());
+            System.out.println(experience.getStartDate());
+            System.out.println(experience.getEndDate());
+            response.setSuccess(false);
+            response.setResponseMessage("Invalid input");
+            return new ResponseEntity<>(response,HttpStatus.BAD_REQUEST);
+        }
+        if (user == null) {
+            response.setSuccess(false);
+            response.setResponseMessage("User not found");
+            return new ResponseEntity<>(response,HttpStatus.BAD_REQUEST);
+        }
+        if(profile ==null){
+            response.setSuccess(false);
+            response.setResponseMessage("Profile not found");
+            return new ResponseEntity<>(response,HttpStatus.BAD_REQUEST);
+        }
+        UserWorkExperience userWorkExperience=new UserWorkExperience();
+        userWorkExperience.setUserId(user.getId());
+        userWorkExperience.setId(experience.getId());
+        userWorkExperience.setExperience(experience.getExperience());
+        userWorkExperience.setJobPosition(experience.getJobPosition());
+        userWorkExperience.setUserProfile(experience.getUserProfile());
+        userWorkExperience.setCompany(experience.getCompany());
+        userWorkExperience.setStartDate(experience.getStartDate());
+        userWorkExperience.setEndDate(experience.getEndDate());
+        UserWorkExperience updatedWorkExperience=userWorkExperienceService.updateUserWorkExperience(userWorkExperience);
+        if (updatedWorkExperience==null){
+            response.setResponseMessage("Invalid user work experience");
+            response.setSuccess(false);
+            return new ResponseEntity<>(response,HttpStatus.BAD_REQUEST);
+        }else {
+            response.setResponseMessage("user work experience created");
+            response.setSuccess(true);
+            return new ResponseEntity<>(response,HttpStatus.OK);
+        }
 
+    }
+
+    public ResponseEntity<UserResponse>updateEducation(UserEducation userEducation ,String email){
+        User user =userService.getUserByEmailid(email);
+        UserProfile profile=user.getProfile();
+        UserResponse response=new UserResponse();
+        if(userEducation==null){
+            response.setSuccess(false);
+            response.setResponseMessage("Empty input");
+            return new ResponseEntity<>(response,HttpStatus.BAD_REQUEST);
+        }
+        if (user==null){
+            response.setSuccess(false);
+            response.setResponseMessage("User not found");
+            return new ResponseEntity<>(response,HttpStatus.BAD_REQUEST);
+        }
+        if(profile==null){
+            response.setSuccess(false);
+            response.setResponseMessage("Profile not found");
+            return new ResponseEntity<>(response,HttpStatus.BAD_REQUEST);
+        }
+        UserEducation userEducation1=new UserEducation();
+        userEducation1.setUserId(user.getId());
+        userEducation1.setId(userEducation.getId());
+        userEducation1.setDegree(userEducation.getDegree());
+        userEducation1.setInstitution(userEducation.getInstitution());
+        userEducation1.setStartDate(userEducation.getStartDate());
+        userEducation1.setEndDate(userEducation.getEndDate());
+        userEducation1.setUserProfile(profile);
+        UserEducation updateedEducation=userEducationService.updateUserEducation(userEducation1);
+        if(updateedEducation==null){
+            response.setResponseMessage("Invalid user education");
+            response.setSuccess(false);
+            return new ResponseEntity<>(response,HttpStatus.BAD_REQUEST);
+        }
+        else{
+            response.setResponseMessage("user education created");
+            response.setSuccess(true);
+            return new ResponseEntity<>(response,HttpStatus.OK);
+        }
+    }
+    public ResponseEntity<byte[]> downloadResume(String email){
+        if (email==null){
+            return new ResponseEntity<>(null,HttpStatus.BAD_REQUEST);
+        }
+        User user =userService.getUserByEmailid(email);
+        byte[] userResume=user.getProfile().getResume();
+        HttpHeaders headers = new HttpHeaders();
+        headers.set(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=resume.pdf");
+        headers.set(HttpHeaders.CONTENT_TYPE, "application/pdf");
+        if(userResume==null){
+            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+        }else {
+
+            return new ResponseEntity<>(userResume, headers, HttpStatus.OK);
+        }
+    }
     public static byte[] convertImageToByteArray(MultipartFile file) {
         try {
             return file.getBytes();

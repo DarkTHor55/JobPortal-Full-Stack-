@@ -5,10 +5,7 @@ import com.JobPortal.Configuration.*;
 import com.JobPortal.Execption.EmailValidationExecption;
 import com.JobPortal.Execption.OtpValidtionExection;
 import com.JobPortal.Execption.UserSaveFailedException;
-import com.JobPortal.Model.Address;
-import com.JobPortal.Model.User;
-import com.JobPortal.Model.UserProfile;
-import com.JobPortal.Model.UserSkill;
+import com.JobPortal.Model.*;
 import com.JobPortal.Repository.AddressRepository;
 import com.JobPortal.Request.LoginRequest;
 import com.JobPortal.Request.ProfileRequest;
@@ -80,7 +77,7 @@ public class UserController {
         return userResources.addProfileTOuser(profile, email);
     }
 
-    @PostMapping("/updateSkill")
+    @PostMapping("/update/skills")
     public ResponseEntity<UserResponse> updateSkill(@RequestBody UserSkill userSkill, @RequestHeader("authorization") String jwt) throws UserSaveFailedException {
         jwt = jwt.substring(7);
         String email = jwtUtils.extractUsername(jwt);
@@ -88,5 +85,22 @@ public class UserController {
 
     }
 
+    @PostMapping("/update/work-experience")
+    public ResponseEntity<UserResponse> updateWorkExp(@RequestBody UserWorkExperience exp, @RequestHeader("authorization") String jwt){
+        jwt = jwt.substring(7);
+        String email = jwtUtils.extractUsername(jwt);
+        return userResources.updateWorkExperience(exp,email);
 
+    }
+
+    @PostMapping("/update/education")
+    public ResponseEntity<UserResponse> updateEducation(@RequestBody UserEducation education, @RequestHeader("authorization") String jwt){
+        jwt = jwt.substring(7);
+        String email = jwtUtils.extractUsername(jwt);
+        return userResources.updateEducation(education,email);
+    }
+    @GetMapping("/resume/download/")
+    public ResponseEntity<byte[]> downloadResume(@RequestParam("email") String email){
+        return userResources.downloadResume(email);
+    }
 }
