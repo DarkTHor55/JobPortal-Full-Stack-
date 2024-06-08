@@ -163,16 +163,16 @@ public class UserServiceImpl implements UserService {
                 oldUser.setEmail(user.getEmail());
             }
         } else {
-            throw new EmailValidationExecption("Email already exists");
+            user.setEmail(oldUser.getEmail());
         }
         //Password Validation
         // Password Sould not be change by updating for changing pass we have to create a diffrerent method because of security issues
-        String newPass = user.getPassword();
-        if (passwordEncoder.matches(newPass, oldUser.getPassword())) {
-//            user.setPassword(passwordEncoder.encode(newPass)); // no need
-        } else {
-            throw new PasswordValidationExecption(" Password Mismatch ");
-        }
+//        if (passwordEncoder.matches(user.getPassword(), oldUser.getPassword())) {
+//
+//            user.setPassword(oldUser.getPassword()); // no need
+//        } else {
+//            throw new PasswordValidationExecption(" Password Mismatch ");
+//        }
         //number
         // Phone number validation
         Long phoneNumber = user.getPhoneNumber();
@@ -197,7 +197,12 @@ public class UserServiceImpl implements UserService {
         if (status == null) {
             oldUser.setStatus("ACTIVE");
         }
-        return userRepository.save(oldUser);
+        user.setStatus(status);
+        user.setAddress(oldUser.getAddress());
+        user.setProfile(oldUser.getProfile());
+        user.setRegistrationDate(oldUser.getRegistrationDate());
+        userRepository.deleteById(oldUser.getId());
+        return userRepository.save(user);
     }
 
     @Override

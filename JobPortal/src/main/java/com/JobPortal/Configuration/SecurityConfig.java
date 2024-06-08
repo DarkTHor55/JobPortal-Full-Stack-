@@ -38,7 +38,7 @@ public class SecurityConfig {
         http.cors(AbstractHttpConfigurer::disable);
         http.authorizeHttpRequests(
 //                 this APIs are for Login and Register
-                auth -> auth.requestMatchers("/api/user/**", "/api/user/register").permitAll()
+                auth -> auth.requestMatchers("/api/user/**", "/api/job/**").permitAll()
                         .anyRequest().authenticated()
         );
 

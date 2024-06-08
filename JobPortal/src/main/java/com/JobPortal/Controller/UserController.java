@@ -4,6 +4,7 @@ import com.JobPortal.AllResources.UserResources;
 import com.JobPortal.Configuration.*;
 import com.JobPortal.Execption.EmailValidationExecption;
 import com.JobPortal.Execption.OtpValidtionExection;
+import com.JobPortal.Execption.PasswordValidationExecption;
 import com.JobPortal.Execption.UserSaveFailedException;
 import com.JobPortal.Model.*;
 import com.JobPortal.Repository.AddressRepository;
@@ -48,10 +49,10 @@ public class UserController {
         return userResources.loginUser(request);
     }
 
-    @DeleteMapping("/delete/{userId}")
-    public ResponseEntity<String> deleteUser(@PathVariable Long userId) {
-        return userResources.deleteUser(userId);
-    }
+//    @DeleteMapping("/delete/{userId}")
+//    public ResponseEntity<String> deleteUser(@PathVariable Long userId) {
+//        return userResources.deleteUser(userId);
+//    }
 
     @GetMapping("/fetch")
     public ResponseEntity<User> fetchUser(@RequestBody Long userId) {
@@ -103,4 +104,24 @@ public class UserController {
     public ResponseEntity<byte[]> downloadResume(@RequestParam("email") String email){
         return userResources.downloadResume(email);
     }
+    @PutMapping("/update/user")
+    public ResponseEntity<UserResponse> updateUser(@RequestBody User user, @RequestHeader("authorization") String jwt) throws PasswordValidationExecption, OtpValidtionExection, EmailValidationExecption {
+        jwt = jwt.substring(7);
+        String email = jwtUtils.extractUsername(jwt);
+        return userResources.updateUser(user,email);
+    }
+
+    @DeleteMapping("/delete/{userId}")
+    public ResponseEntity<String> deleteUser(@PathVariable("userId") Long userId){
+        boolean deleted=userService.removeUser(userId);
+        if(deleted){
+            return new ResponseEntity<>("user Deleted",HttpStatus.OK);
+        }else {
+            return new ResponseEntity<>("Not found",HttpStatus.NOT_FOUND);
+        }
+
+    }
+
+
+
 }

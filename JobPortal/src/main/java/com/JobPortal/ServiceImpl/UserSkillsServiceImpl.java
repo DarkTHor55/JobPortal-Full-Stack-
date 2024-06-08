@@ -1,5 +1,6 @@
 package com.JobPortal.ServiceImpl;
 
+import com.JobPortal.AllResources.UserResources;
 import com.JobPortal.Model.UserProfile;
 import com.JobPortal.Model.UserSkill;
 import com.JobPortal.Repository.UserSkillsRepository;
@@ -20,5 +21,10 @@ public class UserSkillsServiceImpl implements UserSkilsService {
 //        abi isme bhot kam h abi repeat skills ko b handle krna h
 
         return userSkillsRepository.save(userSkill);
+    }
+
+    @Override
+    public void deleteUserSkill(Long skillId) {
+        userSkillsRepository.deleteById(skillId);
     }
 }

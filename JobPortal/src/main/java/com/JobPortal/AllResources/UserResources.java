@@ -3,6 +3,7 @@ package com.JobPortal.AllResources;
 import com.JobPortal.Configuration.JwtUtils;
 import com.JobPortal.Execption.EmailValidationExecption;
 import com.JobPortal.Execption.OtpValidtionExection;
+import com.JobPortal.Execption.PasswordValidationExecption;
 import com.JobPortal.Execption.UserSaveFailedException;
 import com.JobPortal.Model.*;
 import com.JobPortal.Repository.UserRepository;
@@ -185,14 +186,7 @@ public class UserResources {
         }
     }
 
-    public ResponseEntity<String> deleteUser(Long userId) {
-        boolean success = userService.removeUser(userId);
-        if (success) {
-            return new ResponseEntity<>("User deleted successfully", HttpStatus.OK);
-        } else {
-            return new ResponseEntity<>("User not found in database", HttpStatus.NOT_FOUND);
-        }
-    }
+
 
     public ResponseEntity<User> fetchUser(Long userId) {
         User user = userService.getUserById(userId);
@@ -398,6 +392,39 @@ public class UserResources {
             return new ResponseEntity<>(userResume, headers, HttpStatus.OK);
         }
     }
+    public ResponseEntity<UserResponse>updateUser(User user, String email) throws PasswordValidationExecption, OtpValidtionExection, EmailValidationExecption {
+        User oldUser=userService.getUserByEmailid(email);
+        UserResponse response=new UserResponse();
+        if(oldUser==null){
+            response.setSuccess(false);
+            response.setResponseMessage("User not found");
+            return new ResponseEntity<>(response,HttpStatus.BAD_REQUEST);
+        }
+        if(user==null){
+            response.setSuccess(false);
+            response.setResponseMessage("Empty input");
+            return new ResponseEntity<>(response,HttpStatus.BAD_REQUEST);
+        }
+        user.setId(oldUser.getId());
+        user.setPassword(oldUser.getPassword());
+        user.setRole(oldUser.getRole());
+        User updatedUser=userService.updateUser(email,user);
+        if(updatedUser==null){
+            response.setSuccess(false);
+            response.setResponseMessage("Invalid user");
+            return new ResponseEntity<>(response,HttpStatus.BAD_REQUEST);
+        }else{
+            response.setSuccess(true);
+            response.setResponseMessage("User updated");
+            return new ResponseEntity<>(response,HttpStatus.OK);
+        }
+    }
+
+
+
+
+
+
     public static byte[] convertImageToByteArray(MultipartFile file) {
         try {
             return file.getBytes();
@@ -429,6 +456,8 @@ public class UserResources {
             return null;
         }
     }
+
+
 
 
 }
