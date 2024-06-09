@@ -18,7 +18,7 @@ import java.util.List;
 public class Job {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private int id;
+    private Long id;
     @ManyToOne
     @JoinColumn(name = "employer_id")
     private User employer;

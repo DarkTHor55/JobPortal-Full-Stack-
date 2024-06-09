@@ -25,7 +25,7 @@ public class JobApplication {
     @JoinColumn(name = "employee_id")
     private User employee;
     private String dateTime;
-    private String status; // Applied, Shortlisted, Rejected
+    private String status;
     @Transient
     private Long jobId;
     @Transient

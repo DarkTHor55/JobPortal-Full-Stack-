@@ -11,6 +11,7 @@ import lombok.Setter;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.util.ArrayList;
 import java.util.List;
 @Service
 public class JobServiceImpl implements JobService {
@@ -31,7 +32,7 @@ public class JobServiceImpl implements JobService {
 
     @Override
     public Job update(Job job,Address address) {
-        addressRepository.save(address);
+
         return jobRepository.save(job);
 
     }
@@ -64,6 +65,22 @@ public class JobServiceImpl implements JobService {
     @Override
     public List<Job> searchJobNameAndStatusIn(String jobName, List<String> status) {
         return jobRepository.findByTitleContainingIgnoreCaseAndStatusIn(jobName, status);
+    }
+
+    public List<Job> searchJobByEmployId(Long employeeId) {
+        List<Job> jobs = jobRepository.findAll();
+        if (employeeId == null) {
+            System.out.println("Provided employeeId is null or empty");
+            return null;
+        }
+        List<Job> finalJobs=new ArrayList<>();
+        for(Job job : jobs) {
+            Long id = job.getEmployer().getId();
+            if(id.equals(employeeId)){
+                finalJobs.add(job);
+            }
+        }
+        return finalJobs;
     }
 
 
