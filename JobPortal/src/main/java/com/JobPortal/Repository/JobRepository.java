@@ -16,7 +16,6 @@ public interface JobRepository extends JpaRepository<Job,Long> {
 
     List<Job> findByTitleContainingIgnoreCaseAndStatusIn(String title, List<String> status);
 
-    List<Job> findByCategoryAndJobTypeAndSalaryRangeAndStatusIn(JobCategory jobCategory, String jobType,
-                                                                String salaryRange, List<String> status);
+//    List<Job> findByCategoryAndJobTypeAndSalaryRange(JobCategory jobCategory, String jobType);
 
 }

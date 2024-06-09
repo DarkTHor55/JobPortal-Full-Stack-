@@ -66,10 +66,7 @@ public class JobServiceImpl implements JobService {
         return jobRepository.findByTitleContainingIgnoreCaseAndStatusIn(jobName, status);
     }
 
-    @Override
-    public List<Job> searchJobByCategoryAndTypeAndSalaryRangeAndStatus(JobCategory category, String type, String salaryRange, List<String> status) {
-        return jobRepository.findByCategoryAndJobTypeAndSalaryRangeAndStatusIn(category,type,salaryRange,status);
-    }
+
     public Job findJobByEmailid(String emailid) {
         List<Job> jobs = jobRepository.findAll();
         if (emailid == null || emailid.trim().isEmpty()) {

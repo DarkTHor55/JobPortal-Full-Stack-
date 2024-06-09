@@ -2,8 +2,10 @@ package com.JobPortal.AllResources;
 import com.JobPortal.Model.Address;
 import com.JobPortal.Model.Job;
 import com.JobPortal.Model.User;
+import com.JobPortal.Repository.JobRepository;
 import com.JobPortal.Request.JobRequest;
 import com.JobPortal.Response.JobResponse;
+import com.JobPortal.ServiceImpl.JobCategoryServiceImpl;
 import com.JobPortal.ServiceImpl.JobServiceImpl;
 import com.JobPortal.ServiceImpl.UserServiceImpl;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -19,9 +21,14 @@ import java.util.List;
 @Component
 public class JobResource {
     @Autowired
+    private JobCategoryServiceImpl jobCategoryService;
+    @Autowired
     private JobServiceImpl jobService;
     @Autowired
     private UserServiceImpl userService;
+    @Autowired
+    private JobRepository jobRepository;
+
     public ResponseEntity<JobResponse> createJob(JobRequest request,String email) {
         User user=userService.getUserByEmailid(email);
         JobResponse res = new JobResponse();
@@ -50,7 +57,12 @@ public class JobResource {
         job.setCompanyLogo(multiPartFileToByteArray(request.getCompanyLogo()));
         job.setCompanyName(request.getCompanyName());
         job.setDescription(request.getDescription());
-        job.setCategory(null);
+        if(request.getJobCategoryId()==null){
+            job.setCategory(null);
+
+        }else{
+            job.setCategory(jobCategoryService.getJobCategoryById(request.getJobCategoryId()));
+        }
         job.setStatus("Active");
         job.setDatePosted(new Date());
         job.setApplicationCount(0);
@@ -103,7 +115,12 @@ public class JobResource {
         job.setCompanyLogo(multiPartFileToByteArray(request.getCompanyLogo()));
         job.setCompanyName(request.getCompanyName());
         job.setDescription(request.getDescription());
-        job.setCategory(oldJob.getCategory());
+        if(request.getJobCategoryId()==null){
+            job.setCategory(null);
+
+        }else{
+            job.setCategory(jobCategoryService.getJobCategoryById(request.getJobCategoryId()));
+        }
         job.setStatus(oldJob.getStatus());
         job.setDatePosted(oldJob.getDatePosted());
         job.setApplicationCount(oldJob.getApplicationCount());
@@ -128,5 +145,88 @@ public class JobResource {
             e.printStackTrace();
             return null;
         }
+    }
+
+    public ResponseEntity<List<Job>> fetchAllJob() {
+        List<Job> jobs = jobRepository.findAll();
+        if (jobs==null){
+            return ResponseEntity.status(404).body(null);
+        }
+        return new ResponseEntity<>(jobs,HttpStatus.OK);
+    }
+
+    public ResponseEntity<JobResponse> searchJobs(Long categoryId, String type, String salaryRange) {
+        JobResponse res=new JobResponse();
+        List<Job> jobs=jobRepository.findAll();
+        List<Job> jobsFinl=new ArrayList<>();
+        for (Job job : jobs){
+            if (job.getCategory().getId()==categoryId&&job.getJobType()==type&& salaryRange==job.getSalaryRange()){
+                jobsFinl.add(job);
+            }
+        }
+        if (jobsFinl.size()==0){
+            res.setSuccess(false);
+            res.setResponseMessage("No Jobs");
+            return new ResponseEntity<>(res,HttpStatus.NOT_FOUND);
+
+        }else {
+            res.setSuccess(true);
+            res.setResponseMessage("Jobs Found");
+            return new ResponseEntity<>(res,HttpStatus.OK);
+        }
+    }
+
+    public ResponseEntity<Job> getJobById(Long jobId) {
+        Job job = jobRepository.findById(jobId).orElse(null);
+        JobResponse response   =new JobResponse();
+        if (job==null){
+            response.setSuccess(false);
+            response.setResponseMessage("Job Not exists");
+            return new ResponseEntity<>(null,HttpStatus.BAD_REQUEST);
+        }
+        else {
+            response.setResponseMessage("Job found");
+            response.setSuccess(true);
+            return new ResponseEntity<>(job,HttpStatus.OK);
+
+        }
+    }
+
+    public ResponseEntity<List<Job>> getJobByEmployerId(Long employerId) {
+        User user=userService.getUserById(employerId);
+        JobResponse response=new JobResponse();
+        if (user==null){
+            response.setSuccess(false);
+            response.setResponseMessage("User Not exists");
+            return new ResponseEntity<>(null,HttpStatus.BAD_REQUEST);
+        }
+        List<Job> jobs=jobRepository.findAll();
+        List<Job> jobsFinl=new ArrayList<>();
+        for (Job job : jobs){
+            if (job.getEmployer().getId()==employerId){
+                jobsFinl.add(job);
+            }
+        }
+        if(jobsFinl.size()==0){
+            response.setSuccess(false);
+            response.setResponseMessage("No Jobs");
+            return new ResponseEntity<>(null,HttpStatus.NOT_FOUND);
+        }else {
+            response.setSuccess(true);
+            response.setResponseMessage("Jobs Found");
+            return new ResponseEntity<>(jobsFinl,HttpStatus.OK);
+        }
+    }
+
+    public ResponseEntity<JobResponse> deleteJob(Long jobId) {
+        Job job = jobRepository.findById(jobId).orElse(null);
+        JobResponse response   =new JobResponse();
+        if (job==null){
+            response.setSuccess(false);
+            response.setResponseMessage("Job Not exists");
+            return new ResponseEntity<>(response,HttpStatus.BAD_REQUEST);
+        }
+        jobRepository.delete(job);
+        return new ResponseEntity<>(response,HttpStatus.OK);
     }
 }

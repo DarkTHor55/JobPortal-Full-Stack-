@@ -13,6 +13,9 @@ import javax.validation.constraints.NotBlank;
 @NoArgsConstructor
 @AllArgsConstructor
 public class JobRequest {
+
+    @NotNull
+    private Long jobCategoryId;
     @NotBlank
     private String title;
 

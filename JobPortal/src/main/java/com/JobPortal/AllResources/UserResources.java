@@ -274,6 +274,7 @@ public class UserResources {
         }
 
         userSkill.setUserProfile(userProfile);
+        userSkill.setUserId(user.getId());
         UserSkill userSkill1 = userSkillsService.updateUserSkill(userSkill,userProfile);
         if (userSkill1 == null) {
             throw new UserSaveFailedException("Failed to update the User Skill");
