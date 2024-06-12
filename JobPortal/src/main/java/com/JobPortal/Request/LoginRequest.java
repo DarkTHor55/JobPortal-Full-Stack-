@@ -10,10 +10,11 @@ import lombok.*;
 @AllArgsConstructor
 public class LoginRequest {
 
-    private String emailId;
+    private String email;
 
     private String password;
 
     private String role;
+
 }
 

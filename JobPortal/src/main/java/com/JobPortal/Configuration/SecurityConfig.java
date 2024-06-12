@@ -38,7 +38,7 @@ public class SecurityConfig {
         http.cors(AbstractHttpConfigurer::disable);
         http.authorizeHttpRequests(
 //                 this APIs are for Login and Register
-                auth -> auth.requestMatchers("/api/user/**", "/api/job/**").permitAll()
+                auth -> auth.requestMatchers("/api/user/**", "/api/job/**", "/api/admin/**").permitAll()
                         .anyRequest().authenticated()
         );
 
@@ -50,14 +50,14 @@ public class SecurityConfig {
 
     private CorsConfigurationSource apiConfigurationSource() {
         CorsConfiguration configuration = new CorsConfiguration();
-        configuration.setAllowedOrigins(Arrays.asList("http://localhost:3000/", "https://localhost:8080"));
-        configuration.setAllowedMethods(Arrays.asList("GET", "POST", "PUT", "DELETE", "post", "get"));
+        configuration.setAllowedOrigins(Arrays.asList("http://localhost:5173", "https://localhost:8080"));
+        configuration.setAllowedMethods(Arrays.asList("GET", "POST", "PUT", "DELETE", "OPTIONS"));
         configuration.setExposedHeaders(Arrays.asList("Authorization"));
         configuration.setAllowCredentials(true);
         configuration.setAllowedHeaders(Arrays.asList("*"));
         configuration.setMaxAge(3600L);
-        UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
 
+        UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
         source.registerCorsConfiguration("/**", configuration);
 
         return source;

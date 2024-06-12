@@ -26,9 +26,11 @@ import org.springframework.web.multipart.MultipartFile;
 import java.io.IOException;
 import java.util.Date;
 import java.util.List;
+import java.util.Map;
 
 @RestController
 @RequestMapping("api/user")
+@CrossOrigin(origins = "http://localhost:5173")
 public class UserController {
     @Autowired
     private UserResources userResources;
@@ -39,6 +41,21 @@ public class UserController {
     @Autowired
     private UserServiceImpl userService;
 
+    @PostMapping("/verify-otp")
+    public boolean otp(@RequestBody Map<String, Object> result) {
+        String email = (String) result.get("email");
+        int otp = Integer.parseInt(result.get("otp").toString());
+        return userService.verifyOtp(otp);
+    }
+    @PostMapping("/request-otp")
+    public boolean validationOtp(@RequestBody String email) throws OtpValidtionExection, EmailValidationExecption {
+       boolean test= userService.emailSend(email);
+       if (test){
+         return userService.sendOtp(email);
+       }
+       return false;
+
+    }
     @PostMapping("/register")
     public ResponseEntity<UserResponse> registerUser(@RequestBody UserRequest request) throws OtpValidtionExection, EmailValidationExecption {
         return userResources.registerUser(request);
@@ -46,6 +63,7 @@ public class UserController {
 
     @PostMapping("/login")
     public ResponseEntity<LoginResponse> loginUser(@RequestBody LoginRequest request) throws OtpValidtionExection, EmailValidationExecption {
+        System.out.println(request.getEmail()+" "+request.getPassword()+" "+request.getRole());
         return userResources.loginUser(request);
     }
 
@@ -121,6 +139,7 @@ public class UserController {
         }
 
     }
+
 
 
 

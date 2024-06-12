@@ -25,53 +25,33 @@ public class UserServiceImpl implements UserService {
     @Autowired
     private EmailSenderService emailSenderService;
     public static int otp = randomNumber();
+    private boolean emailValidator=false;
+    private String finalEmail;
+
 
     @Override
     public User addUser(User user) throws EmailValidationExecption, OtpValidtionExection {
 
-        // Email validation
-        boolean emailAlreadyExists = false;
-        boolean validEmail = false;
-        if (isEmailExits(user.getEmail())) {
-            emailAlreadyExists = true;
+        //email validation
+        if (!emailValidator){
+            throw new OtpValidtionExection("OTP is not valid");
         }
-        String email = user.getEmail();
-        if (!emailAlreadyExists) {
-            int countDot = 0;
-            for (int i = 0; i < email.length() - 3; i++) {
-                if (email.charAt(i) == '.') {
-                    System.out.println(i + "................................................................" + email.length());
-                    if (email.charAt(i + 1) == 'c' && email.charAt(i + 2) == 'o' && email.charAt(i + 3) == 'm' && email.length() == i + 4) {
-                        System.out.println(email.charAt(i + 1) + "........." + email.charAt(i + 2) + "........................." + email.charAt(i + 3) + "..............................");
-//                            if(isEmailExits(user.getEmail())){   // y check nhi hoga kuki mere pas itne email nhi h
-                        validEmail = true;
-                        break;
-//                            }
-
-
-                    }
-                    if (countDot >= 2 || email.charAt(i) == '-' || email.charAt(i) == '!' || email.charAt(i) == '%' ||
-                            email.charAt(i) == '^' || email.charAt(i) == '*' || email.charAt(i) == '&' || email.charAt(i) == '(' ||
-                            email.charAt(i) == ')' || email.charAt(i) == '[' || email.charAt(i) == '_') {
-                        throw new IllegalArgumentException("Invalid email domain in password");
-                    }
-
-                }
-            }
-            if (!validEmail) {
-                throw new IllegalArgumentException("Email not valid ");
-            }
-            String subject = "Your OTP";
-            String body = "Your OTP is: " + otp + ". Don't share your OTP with anyone.";
-            emailSenderService.sendEmail(email, subject, body, otp);
-            Scanner scanner = new Scanner(System.in);
-            int checkOtp = scanner.nextInt();
-            if (checkOtp != otp) {
-                throw new OtpValidtionExection("OTP is not valid");
-            }
-        } else {
+        if(isEmailExits(user.getEmail())){
             throw new EmailValidationExecption("Email already exists");
         }
+
+        System.out.println(finalEmail);
+
+        char newEmail[] = new char[finalEmail.length() - 2];
+
+        for (int i = 1; i < finalEmail.length() - 1; i++) {
+            newEmail[i - 1] = finalEmail.charAt(i);
+        }
+        String newEmailString = new String(newEmail);
+        System.out.println(newEmailString);
+        user.setEmail(newEmailString);
+
+        finalEmail=null;
 
         //Password Encrytption
         user.setPassword(passwordEncoder.encode(user.getPassword()));
@@ -81,6 +61,7 @@ public class UserServiceImpl implements UserService {
         String phoneNumberStr = Long.toString(phoneNumber);
         if (phoneNumberStr.length() != 10) {
             if (phoneNumber < 1000000000L || phoneNumber > 9999999999L) {
+
                 throw new IllegalArgumentException("Phone number must be between 1000000000 and 9999999999");
             }
             throw new IllegalArgumentException("Phone number must be of 10 digit");
@@ -123,7 +104,7 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public User updateUser(String Email, User user) throws OtpValidtionExection, EmailValidationExecption, PasswordValidationExecption {
+    public User     updateUser(String Email, User user) throws OtpValidtionExection, EmailValidationExecption, PasswordValidationExecption {
         User oldUser = userRepository.findByEmail(Email);
         // Email validation
         boolean emailAlreadyExists = false;
@@ -131,6 +112,7 @@ public class UserServiceImpl implements UserService {
         if (isEmailExits(user.getEmail())) {
             emailAlreadyExists = true;
         }
+        System.out.println(isEmailExits(user.getEmail()));
         String email = user.getEmail();
         if (!emailAlreadyExists) {
             int countDot = 0;
@@ -260,4 +242,68 @@ public class UserServiceImpl implements UserService {
         }
         return null;
     }
+
+    public boolean emailSend(String email) throws OtpValidtionExection, EmailValidationExecption {
+        User user = userRepository.findByEmail(email);
+        // Email validation
+        boolean emailAlreadyExists = false;
+        if( user!=null){
+            throw new IllegalStateException("User  exist");
+        }
+
+        System.out.println(email+"/////////////////");
+        char newEmail[] = new char[email.length() - 2];
+
+        for (int i = 1; i < email.length() - 1; i++) {
+            newEmail[i - 1] = email.charAt(i);
+        }
+        String newEmailString = new String(newEmail);
+        System.out.println(newEmailString);
+        List<User> users = this.userRepository.findAll();
+        for (User u : users) {
+            if(u.getEmail().equals(newEmailString)){
+                emailAlreadyExists=true;
+            }
+        }
+        if (!emailAlreadyExists) {
+            int countDot = 0;
+            for (int i = 0; i < email.length() - 3; i++) {
+                if (email.charAt(i) == '.') {
+                    System.out.println(i + "................................................................" + email);
+                    if (email.charAt(i + 1) == 'c' && email.charAt(i + 2) == 'o' && email.charAt(i + 3) == 'm' && email.length() == i + 5) {
+                        System.out.println(email.charAt(i + 1) + "........." + email.charAt(i + 2) + "........................." + email.charAt(i + 3) + "..............................");
+                        finalEmail=email;
+                        return true;
+                    }
+                    if (countDot >= 2 || email.charAt(i) == '-' || email.charAt(i) == '!' || email.charAt(i) == '%' ||
+                            email.charAt(i) == '^' || email.charAt(i) == '*' || email.charAt(i) == '&' || email.charAt(i) == '(' ||
+                            email.charAt(i) == ')' || email.charAt(i) == '[' || email.charAt(i) == '_') {
+                        throw new IllegalArgumentException("Invalid email domain in password");
+                    }
+                }
+            }
+
+        } else {
+            throw new EmailValidationExecption("Email already exists");
+        }
+        return false;
+
+    }
+    public  boolean sendOtp (String email) throws OtpValidtionExection {
+        String subject = "Your OTP";
+        String body = "Your OTP is: " + otp + ". Don't share your OTP with anyone.";
+        emailSenderService.sendEmail(email, subject, body, otp);
+        return true;
+
+    }
+
+    public boolean verifyOtp(int newOtp) {
+        System.out.println(newOtp);
+        if(otp==newOtp){
+            emailValidator=true;
+            return true;
+        }
+        return false;
+    }
+
 }

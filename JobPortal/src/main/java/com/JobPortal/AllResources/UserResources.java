@@ -63,8 +63,8 @@ public class UserResources {
     private UserEducationServiceImpl userEducationService;
     @Autowired
     private UserRepository userRepository;
-
     public ResponseEntity<UserResponse> registerUser(UserRequest request) throws OtpValidtionExection, EmailValidationExecption {
+
 
         LOG.info("Received request for register user");
 
@@ -75,7 +75,7 @@ public class UserResources {
             response.setSuccess(false);
             return new ResponseEntity<UserResponse>(response, HttpStatus.BAD_REQUEST);
         }
-
+    LOG.info("Received request for register user");
         User existingUser = userService.getUserByEmailAndStatus(request.getEmail(), Constants.ActiveStatus.ACTIVE.value());
 //if  that user already exits
         if (existingUser != null) {
@@ -83,6 +83,8 @@ public class UserResources {
             response.setSuccess(false);
             return new ResponseEntity<UserResponse>(response, HttpStatus.BAD_REQUEST);
         }
+        LOG.info("Received request for register user");
+
 //if role is null
         if (request.getRole() == null) {
             response.setResponseMessage("bad request ,Role is missing");
@@ -90,6 +92,7 @@ public class UserResources {
 
             return new ResponseEntity<UserResponse>(response, HttpStatus.BAD_REQUEST);
         }
+        LOG.info("Received request for register user");
 
         Address address = new Address();
         address.setStreet(request.getStreet());
@@ -109,6 +112,7 @@ public class UserResources {
         user.setLastName(request.getLastName());
         user.setEmail(request.getEmail());
         UserProfile newProfile = userProfileService.add(new UserProfile());
+
         user.setProfile(newProfile);
 
         User userResponse = userService.addUser(user);
@@ -135,6 +139,9 @@ public class UserResources {
     }
 
     public ResponseEntity<LoginResponse> loginUser(LoginRequest request) {
+
+        System.out.println(request.getPassword());
+        System.out.println(request.getEmail());
         LOG.info("Received request for User Login");
         LoginResponse response = new LoginResponse();
 //        check request is not empty
@@ -145,7 +152,7 @@ public class UserResources {
             response.setSuccess(false);
             return new ResponseEntity<>(response, HttpStatus.BAD_REQUEST);
         }
-        User us = userService.login(request.getEmailId(), request.getPassword());
+        User us = userService.login(request.getEmail(), request.getPassword());
         if (us == null) {
             response.setResponseMessage("Invalid input");
             response.setSuccess(false);
@@ -159,7 +166,7 @@ public class UserResources {
         Authentication authentication;
         try {
 //            authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(request.getEmailId(), request.getPassword(), authorities));
-            authentication = new UsernamePasswordAuthenticationToken(request.getEmailId(), request.getPassword(), authorities);
+            authentication = new UsernamePasswordAuthenticationToken(request.getEmail(), request.getPassword(), authorities);
         } catch (Exception ex) {
             response.setResponseMessage("Invalid email or password.");
             response.setSuccess(false);
@@ -171,9 +178,10 @@ public class UserResources {
 
 //        user = this.userService.getUserByEmailIdAndRoleAndStatus(request.getEmailId(), request.getRole(),
 //                Constants.ActiveStatus.ACTIVE.value());
-        user = userService.getUserByEmailid(request.getEmailId());
+        user = userService.getUserByEmailid(request.getEmail());
         System.out.println(user.getEmail());
         if (jwtToken != null) {
+            System.out.println("aga yha");
             response.setUser(user);
             response.setResponseMessage("Logged in sucessful");
             response.setSuccess(true);
@@ -457,7 +465,6 @@ public class UserResources {
             return null;
         }
     }
-
 
 
 
