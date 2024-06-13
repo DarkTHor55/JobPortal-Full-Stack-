@@ -4,6 +4,7 @@ import com.JobPortal.Execption.EmailValidationExecption;
 import com.JobPortal.Execption.OtpValidtionExection;
 import com.JobPortal.Model.Admin;
 import com.JobPortal.Repository.AdminRepository;
+import com.JobPortal.Request.AdminLoginRequest;
 import com.JobPortal.Request.AdminReqest;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -39,7 +40,18 @@ public class AdminServiceImpl implements com.JobPortal.Service.AdminService {
     @Override
     public Admin createAdmin(AdminReqest ad) throws Exception {
         Admin admin=new Admin();
-        admin.setEmail(ad.getEmail());
+        String email=ad.getEmail();
+        if(email==null||email.isEmpty()){
+            throw new Exception("Data not found");
+        }
+
+        char newEmail[] = new char[email.length() - 2];
+
+        for (int i = 1; i < email.length() - 1; i++) {
+            newEmail[i - 1] = email.charAt(i);
+        }
+        String newEmailString = new String(newEmail);
+        admin.setEmail(newEmailString);
         admin.setFirstName(ad.getFirstName());
         admin.setLastName(ad.getLastName());
         admin.setPassword(ad.getPassword());
@@ -55,15 +67,8 @@ public class AdminServiceImpl implements com.JobPortal.Service.AdminService {
         admin.setPassword(passwordEncoder.encode(admin.getPassword()));
         admin.setUsername(admin.getFirstName()+""+admin.getLastName()+""+userService.randomNumber());
         String username=admin.getUsername();
-        System.out.println(username);
 
-        if (isEmailExits(admin.getEmail())){
-            throw new Exception("Email already exists");
-        }
-        if(emailSend(admin.getEmail())){
-            System.out.println(admin.getEmail());
-            isEmailVarified=sendOtp(admin.getEmail());
-        }
+
         if (isEmailVarified){
             return adminRepository.save(admin);
         }else {
@@ -89,7 +94,6 @@ public class AdminServiceImpl implements com.JobPortal.Service.AdminService {
         }
         String newEmailString = new String(newEmail);
         List<Admin>allAdmin=adminRepository.findAll();
-        System.out.println(newEmailString);
         for(Admin admin : allAdmin){
             if (admin.getEmail().equals(newEmailString)){
                 isEmailValid=true;
@@ -99,9 +103,8 @@ public class AdminServiceImpl implements com.JobPortal.Service.AdminService {
             int countDot = 0;
             for (int i = 0; i < email.length() - 3; i++) {
                 if (email.charAt(i) == '.') {
-                    System.out.println(i + "................................................................" + email);
                     if (email.charAt(i + 1) == 'c' && email.charAt(i + 2) == 'o' && email.charAt(i + 3) == 'm' && email.length() == i + 5) {
-                        System.out.println(email.charAt(i + 1) + "........." + email.charAt(i + 2) + "........................." + email.charAt(i + 3) + "..............................");
+//                        System.out.println(email.charAt(i + 1) + "........." + email.charAt(i + 2) + "........................." + email.charAt(i + 3) + "..............................");
                         finalEmail=email;
                         return true;
                     }
@@ -128,12 +131,25 @@ public class AdminServiceImpl implements com.JobPortal.Service.AdminService {
     }
 
     public boolean verifyOtp(int newOtp) {
-        System.out.println(newOtp+"--------------------------------");
-        System.out.println(otp+"--------------------------------");
         if(otp==newOtp){
+            isEmailVarified = true;
             return true;
         }
         return false;
 
+    }
+
+    public Admin loginAdmin(AdminLoginRequest admin) {
+        Admin admin1 = adminRepository.findByEmail(admin.getEmail());
+        if (admin1 == null) {
+            return null;
+        }
+        if (!passwordEncoder.matches(admin.getPassword(), admin1.getPassword())) {
+            return null;
+        }
+        if(!admin1.getRole().equals(admin.getRole())){
+            return null;
+        }
+        return admin1;
     }
 }

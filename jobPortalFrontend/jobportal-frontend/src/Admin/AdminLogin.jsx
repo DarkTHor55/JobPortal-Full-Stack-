@@ -31,19 +31,18 @@ const styles = {
   },
 };
 
-function Login() {
+function AdminLogin() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [errorMessage, setErrorMessage] = useState('');
   const navigate = useNavigate();
-  const role = 'USER';
-
+  const role = "ADMIN"; 
   const handleLogin = async () => {
     console.log('Email:', email);
     console.log('Password:', password);
 
     try {
-      const response = await fetch('http://localhost:8080/api/user/login', {
+      const response = await fetch('http://localhost:8080/api/admin/login', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -52,13 +51,10 @@ function Login() {
       });
 
       if (response.ok) {
-        const data = await response.json();
-        const token = data.jwtToken;
-        
-        localStorage.setItem('jwtToken', token);
-        console.log(token);
-        
-        navigate('/homeAfter');
+        console.log(response);
+        localStorage.removeItem("loginHeader")
+        localStorage.setItem("loginHeader",true)
+        navigate('/logined');
       } else {
         const errorText = await response.text();
         setErrorMessage(errorText || 'Invalid email or password');
@@ -102,4 +98,4 @@ function Login() {
   );
 }
 
-export default Login;
+export default AdminLogin;

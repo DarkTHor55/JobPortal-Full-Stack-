@@ -40,13 +40,13 @@ const AdminSignup = () => {
       });
 
       if (response.ok) {
-        console.log('Admin registered successfully');
-        const data = await response.json();
-        console.log(data);
+        const text = await response.text();
+        const data = text ? JSON.parse(text) : {};
+        console.log('Admin registered successfully', data);
         navigate('/home');
       } else {
-        alert('Admin registration failed restart form')
         const responseText = await response.text();
+        alert('Admin registration failed. Please restart the form.');
         console.error('Failed to register admin');
         console.error('Response status:', response.status);
         console.error('Response text:', responseText);

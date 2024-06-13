@@ -25,9 +25,10 @@ public class JobCategoryController {
         return categoryResource.addCategory(category);
     }
 
-    @PutMapping("/category/update")
-    public ResponseEntity<UserResponse> updateCategory(@RequestBody Long categoryId,@RequestBody JobCategory category) {
-        return categoryResource.updateCategory(category, categoryId);
+    @PutMapping("/category/update/{editId}")
+    public ResponseEntity<UserResponse> updateCategory(@PathVariable("editId") Long editId,@RequestBody JobCategory category) {
+        System.out.println(editId);
+        return categoryResource.updateCategory(category, editId);
     }
 
     @GetMapping("/category/fetch/all")
@@ -35,12 +36,12 @@ public class JobCategoryController {
         return categoryResource.fetchAllCategory();
     }
 
-    @DeleteMapping("/category/delete")
-    public ResponseEntity<UserResponse> deleteCategory(@RequestParam("categoryId") Long categoryId) {
+    @DeleteMapping("/category/delete/{id}")
+    public ResponseEntity<UserResponse> deleteCategory(@PathVariable("id") Long categoryId) {
         return categoryResource.deleteCategory(categoryId);
     }
-    @GetMapping("/category/fetch")
-    public ResponseEntity<JobCategory> fetchById(@RequestParam("categoryId") Long categoryId) {
+    @GetMapping("/category/fetch/{id}")
+    public ResponseEntity<JobCategory> fetchById(@PathVariable("id") Long categoryId) {
         return categoryResource.fetchById(categoryId);
     }
 }

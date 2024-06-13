@@ -1,5 +1,6 @@
 package com.JobPortal.Request;
 
+import jakarta.persistence.Column;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -20,6 +21,7 @@ public class JobRequest {
     private String title;
 
     @NotBlank
+    @Column(length = 100000)
     private String description;
 
     @NotBlank

@@ -53,13 +53,18 @@ function SigninFirst() {
   
       if (response.ok) {
         const result = await response.json();
-        console.log(result);
-        setMessage('OTP verified successfully.');
-        setOtpSent(false);
-        localStorage.setItem('email', JSON.stringify(email));
-        setEmail('');
-        setOtp('');
-        navigate("/signin-second")
+        if(result){
+          setMessage('OTP verified successfully.');
+          setOtpSent(false);
+          localStorage.setItem('email', JSON.stringify(email));
+          setEmail('');
+          setOtp('');
+          navigate("/signin-second")
+        }else{
+          alert('Invalid OTP. Please try again.');
+          navigate("/signin-user")
+        }
+        
       } else {
         console.error('Failed to verify OTP');
         console.error('Response status:', response.status);

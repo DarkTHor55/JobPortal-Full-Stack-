@@ -1,33 +1,46 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 
 function AddJobs() {
   const [formData, setFormData] = useState({
     title: '',
     description: '',
-    category: '',
-    logo: '',
+    jobCategoryId: '', // Changed category to jobCategoryId to match backend
     companyName: '',
     jobType: '',
     salaryRange: '',
     experienceLevel: '',
     requiredSkills: '',
-    countryRequiredSkills: '',
     street: '',
     city: '',
     state: '',
     pincode: '',
+    country: '',
   });
 
+  const [logo, setLogo] = useState(null);
+  const [categories, setCategories] = useState([]);
   const [message, setMessage] = useState('');
   const navigate = useNavigate();
 
-  const handleLogoChange = (e) => {
-    setFormData({
-      ...formData,
-      logo: e.target.files[0],
-    });
+  useEffect(() => {
+    fetchCategories();
+  }, []);
+
+  const fetchCategories = async () => {
+    try {
+      const response = await fetch('http://localhost:8080/api/job/category/fetch/all');
+      const data = await response.json();
+      setCategories(data);
+    } catch (error) {
+      console.error('Error fetching categories:', error);
+    }
   };
+
+  const handleLogoChange = (e) => {
+    setLogo(e.target.files[0]);
+  };
+
   const handleChange = (e) => {
     const { name, value } = e.target;
     setFormData({
@@ -38,13 +51,24 @@ function AddJobs() {
 
   const handleAddJob = async (e) => {
     e.preventDefault();
+
+    const finalFormData = new FormData();
+    for (const key in formData) {
+      finalFormData.append(key, formData[key]);
+    }
+    if (logo) {
+      finalFormData.append('companyLogo', logo);
+    }
+
+    const token = localStorage.getItem('jwtToken');
+
     try {
-      const response = await fetch('http://localhost:8080/api/jobs/add', {
+      const response = await fetch('http://localhost:8080/api/job/register', {
         method: 'POST',
-        body: JSON.stringify(formData),
         headers: {
-          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`,
         },
+        body: finalFormData,
       });
 
       if (response.ok) {
@@ -85,10 +109,10 @@ function AddJobs() {
             onChange={handleChange}
             style={styles.input}
           >
-            <option value="">Select Jobtype</option>
+            <option value="">Select Job Type</option>
             <option value="Part-time">Part-time</option>
             <option value="Full-time">Full-time</option>
-            <option value="Full-time">Part time & Full-time</option>
+            <option value="Part-time & Full-time">Part-time & Full-time</option>
           </select>
           <label style={{ fontSize: 'small' }}>Company Logo</label>
           <input
@@ -107,21 +131,17 @@ function AddJobs() {
             style={styles.input}
           />
           <select
-            name="Category"
-            value={formData.category}
+            name="jobCategoryId" // Change here to match the backend field name
+            value={formData.jobCategoryId}
             onChange={handleChange}
             style={styles.input}
           >
             <option value="">Select Category</option>
-            <option value="Part-time">IT (Information Technology) Sector</option>
-            <option value="Full-time">Healthcare Sector</option>
-            <option value="Full-time">Finance Sector</option>
-            <option value="Full-time">Education Sector</option>
-            <option value="Full-time">Manufacturing Sector</option>
-            <option value="Full-time">Hospitality Sector</option>
-            <option value="Full-time">Marketing and Advertising  Sector</option>
-            <option value="Full-time">Legal Sector</option>
-            <option value="Full-time">Engineering Sector</option>
+            {categories.map((category) => (
+              <option key={category.id} value={category.id}>
+                {category.name}
+              </option>
+            ))}
           </select>
           <input
             type="text"
@@ -145,14 +165,6 @@ function AddJobs() {
             value={formData.requiredSkills}
             onChange={handleChange}
             placeholder="Required Skills"
-            style={styles.input}
-          />
-          <input
-            type="text"
-            name="countryRequiredSkills"
-            value={formData.countryRequiredSkills}
-            onChange={handleChange}
-            placeholder="Country Required Skills"
             style={styles.input}
           />
           <input
@@ -185,6 +197,14 @@ function AddJobs() {
             value={formData.pincode}
             onChange={handleChange}
             placeholder="Pincode"
+            style={styles.input}
+          />
+          <input
+            type="text"
+            name="country"
+            value={formData.country}
+            onChange={handleChange}
+            placeholder="Country"
             style={styles.input}
           />
         </div>
@@ -220,16 +240,14 @@ const styles = {
   },
   button: {
     padding: '0.5rem 1rem',
-    fontSize: '1rem',
-    borderRadius: '4px',
-    border: 'none',
     backgroundColor: '#007bff',
     color: '#fff',
+    border: 'none',
+    borderRadius: '4px',
     cursor: 'pointer',
   },
   message: {
     marginTop: '1rem',
-    fontSize: '1rem',
     color: 'green',
   },
 };

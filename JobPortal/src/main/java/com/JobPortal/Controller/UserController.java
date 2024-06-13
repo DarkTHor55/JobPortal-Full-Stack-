@@ -8,6 +8,7 @@ import com.JobPortal.Execption.PasswordValidationExecption;
 import com.JobPortal.Execption.UserSaveFailedException;
 import com.JobPortal.Model.*;
 import com.JobPortal.Repository.AddressRepository;
+import com.JobPortal.Repository.UserRepository;
 import com.JobPortal.Request.LoginRequest;
 import com.JobPortal.Request.ProfileRequest;
 import com.JobPortal.Request.UserRequest;
@@ -25,6 +26,7 @@ import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -40,6 +42,8 @@ public class UserController {
     private AddressServiceImpl addressService;
     @Autowired
     private UserServiceImpl userService;
+    @Autowired
+    private UserRepository userRepository;
 
     @PostMapping("/verify-otp")
     public boolean otp(@RequestBody Map<String, Object> result) {
@@ -80,6 +84,11 @@ public class UserController {
     @GetMapping("/fetch/role-wise")
     public ResponseEntity<List<User>> fetchUserByRole(@RequestBody String role) {
         return userResources.fetchUserByRole(role);
+    }
+    @GetMapping("/fetch/all")
+    public ResponseEntity<List<User>> fetchAllUser() {
+        List<User>users= userRepository.findAll();
+        return new ResponseEntity<>(users, HttpStatus.OK);
     }
 
     @PostMapping("/profile")
@@ -138,6 +147,17 @@ public class UserController {
             return new ResponseEntity<>("Not found",HttpStatus.NOT_FOUND);
         }
 
+    }
+    @GetMapping("/total-users")
+    public ResponseEntity<Map<String, Integer>>alluser(){
+        List<User> users=userRepository.findAll();
+        Map<String, Integer> response = new HashMap<>();
+        if(users.size()==0){
+            response.put("count",0);
+            return  new ResponseEntity<>(response,HttpStatus.OK);
+        }
+        response.put("count", users.size());
+        return  new ResponseEntity<>(response,HttpStatus.OK);
     }
 
 

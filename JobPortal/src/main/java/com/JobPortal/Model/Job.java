@@ -24,6 +24,7 @@ public class Job {
     private User employer;
     private String title;
     @Lob
+    @Column(length = 100000)
     private String description;
     @ManyToOne
     @JoinColumn(name = "category_id")

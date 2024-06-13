@@ -105,7 +105,7 @@ public class UserResources {
         user.setAddress(address);
         user.setPassword(request.getPassword());
         user.setPhoneNumber(request.getPhoneNumber());
-        user.setRole(Constants.UserRole.ROLE_ADMIN.value());
+        user.setRole("USER");
         user.setRegistrationDate(new Date().toString());
         user.setStatus("ACTIVE");
         user.setFirstName(request.getFirstName());

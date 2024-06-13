@@ -27,11 +27,16 @@ function AdminSignup1() {
       });
 
       if (response.ok) {
-        setOtpSent(true);
-        setMessage('OTP sent to your email.');
-
+        const result = await response.json();
+        if (result) {
+          setOtpSent(true);
+          setMessage('OTP sent to your email.');
+        } else {
+          alert('Email already exists');
+          navigate('/signin-admin');
+        }
       } else {
-        alert("Email Already exits")
+        alert('Failed to send OTP');
         console.error('Failed to send OTP');
         console.error('Response status:', response.status);
         console.error('Response text:', await response.text());
@@ -39,8 +44,7 @@ function AdminSignup1() {
     } catch (error) {
       console.error('Error:', error);
     }
-  };
-
+  }
   const handleVerifyOtp = async () => {
     try {
       const response = await fetch('http://localhost:8080/api/admin/verify-otp', {
@@ -50,16 +54,21 @@ function AdminSignup1() {
           'Content-Type': 'application/json',
         },
       });
-  
+
       if (response.ok) {
         const result = await response.json();
-        console.log(result);
-        setMessage('OTP verified successfully.');
-        setOtpSent(false);
-        localStorage.setItem('email', JSON.stringify(email));
-        setEmail('');
-        setOtp('');
-        navigate("/admin-signin-second")
+        if (result) {
+          setMessage('OTP verified successfully.');
+          setOtpSent(false);
+          localStorage.setItem('email', JSON.stringify(email));
+          setEmail('');
+          setOtp('');
+          navigate('/admin-signin-second');
+        } else {
+          alert('Invalid OTP. Please try again.');
+          navigate('/signin-admin');
+        }
+        
       } else {
         console.error('Failed to verify OTP');
         console.error('Response status:', response.status);

@@ -18,6 +18,7 @@ public class JobCategory {
     private Long id;
     private String name;
     @Lob
+    @Column(length = 100000)
     private String description;
     private String status;
 }
