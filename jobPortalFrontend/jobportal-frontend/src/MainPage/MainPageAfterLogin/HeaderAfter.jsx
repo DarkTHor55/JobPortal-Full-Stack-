@@ -39,7 +39,7 @@ const HeaderAfter = () => {
             </Link>
           </li>
           <li style={styles.navItem}>
-            <Link to="/All Jobs" style={styles.navLink}>
+            <Link to="/All-Jobs" style={styles.navLink}>
               Jobs
             </Link>
           </li>

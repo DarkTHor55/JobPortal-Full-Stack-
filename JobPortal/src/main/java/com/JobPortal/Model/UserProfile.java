@@ -34,6 +34,10 @@ public class UserProfile {
     @Lob
     @Column(length = 1000000)
     private byte[] profilePic;
+    
+    public void setProfilePicLink(byte[] profilePic) {
+    }
 
-
+    public void setResumeLink(byte[] resume) {
+    }
 }

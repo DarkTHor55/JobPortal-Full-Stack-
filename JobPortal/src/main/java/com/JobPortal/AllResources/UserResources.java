@@ -6,6 +6,7 @@ import com.JobPortal.Execption.OtpValidtionExection;
 import com.JobPortal.Execption.PasswordValidationExecption;
 import com.JobPortal.Execption.UserSaveFailedException;
 import com.JobPortal.Model.*;
+import com.JobPortal.Repository.UserProfileRepository;
 import com.JobPortal.Repository.UserRepository;
 import com.JobPortal.Repository.UserWorkExerienceRepository;
 import com.JobPortal.Request.LoginRequest;
@@ -63,6 +64,9 @@ public class UserResources {
     private UserEducationServiceImpl userEducationService;
     @Autowired
     private UserRepository userRepository;
+    @Autowired
+    private UserProfileRepository userProfileRepository;
+
     public ResponseEntity<UserResponse> registerUser(UserRequest request) throws OtpValidtionExection, EmailValidationExecption {
 
 
@@ -467,5 +471,34 @@ public class UserResources {
     }
 
 
+    public ResponseEntity<ProfileResponse> updateUserProfile(ProfileRequest profile, String email) throws UserSaveFailedException, IOException {
+        // Fetch the user by email
+        User user = userRepository.findByEmail(email);
+        UserProfile existingProfile = user.getProfile();
+
+        if (existingProfile == null) {
+            return new ResponseEntity<>(new ProfileResponse(), HttpStatus.OK);
+        }
+
+        existingProfile.setBio(profile.getBio());
+        existingProfile.setWebsite(profile.getWebsite());
+        existingProfile.setLinkedlnProfileLink(profile.getLinkedlnProfileLink());
+        existingProfile.setGithubProfileLink(profile.getGithubProfileLink());
+
+        if (profile.getResumeLink() != null) {
+            existingProfile.setResume(profile.getResumeLink().getBytes());
+        }
+        if (profile.getProfilePicLink() != null) {
+            existingProfile.setProfilePic(profile.getProfilePicLink().getBytes());
+        }
+
+        userProfileRepository.save(existingProfile);
+
+        ProfileResponse response = new ProfileResponse();
+        response.setSuccess(true);
+        response.setResponse("Profile updated successfully");
+        response.setUser(user);
+        return ResponseEntity.ok(response);
+    }
 
 }

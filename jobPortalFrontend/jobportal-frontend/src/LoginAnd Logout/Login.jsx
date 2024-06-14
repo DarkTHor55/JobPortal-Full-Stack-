@@ -53,7 +53,7 @@ function Login() {
 
       if (response.ok) {
         const data = await response.json();
-        const token = data.jwtToken;
+        const token = data.jwtToken;        
         
         localStorage.setItem('jwtToken', token);
         console.log(token);

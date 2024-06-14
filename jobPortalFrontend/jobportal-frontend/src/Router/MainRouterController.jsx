@@ -1,6 +1,6 @@
 import { BrowserRouter as Router, Route, Routes } from "react-router-dom";
 import Header from '../MainPage/MainPageBeforeLogin/Header';
-import Login from '../Login/Login'
+import Login from '../LoginAnd Logout/Login'
 import HeaderAfter from '../MainPage/MainPageAfterLogin/HeaderAfter';
 // import Playstore from '../MainPage/Playstore';
 import About from '../MainPage/MainPageBeforeLogin/About';
@@ -18,6 +18,10 @@ import AdminHome from "../Admin/AdminHome";
 import AdminCategoryMainPage from "../Admin/AdminCategoryMainPage";
 import AdminJobsPanel from "../Admin/AdminJobsPanel";
 import AdminUsersPanel from "../Admin/AdminUsersPanel";
+import AllJobs from "../MainPage/AllJobs/AllJobs";
+import UserProfile from "../MainPage/UserProfile";
+import LogOut from "../LoginAnd Logout/LogOut";
+import MainBody from "../MainPage/MainBody";
 const MainRouterController = () => {
 
   return (
@@ -27,29 +31,38 @@ const MainRouterController = () => {
         {/* <HeaderAfter/> */}
         <Routes>
         <Route path="/login" element={<><Header /><Login/></>} />
-        <Route path="/home" element={<><Header/></>} />
-        <Route path="/" element={<><Header/></>} />
+        <Route path="/home" element={<><Header/><MainBody/></>} />
+        <Route path="/" element={<><Header/><MainBody/></>} />
         <Route path="/signin-user" element={<><Header /><SigninFirst/></>} />
         <Route path="/signin-second" element={<><Header /><Signin/></>} />
          <Route path="/about" element={<><Header/><About/> </>} />
          <Route path="/contact" element={<><Header/><Contact/> </>} />
 
 
-         <Route path="/homeAfter" element={<><HeaderAfter/></>} />
-         <Route path="/home2" element={<><HeaderAfter/></>} />
+         <Route path="/homeAfter" element={<><HeaderAfter/><MainBody/></>} />
+         <Route path="/home2" element={<><HeaderAfter/><MainBody/></>} />
          <Route path="/addjob" element={<><HeaderAfter/><AddJobs/> </>} />
+         <Route path="/about2" element={<><HeaderAfter/> </>} />
+         <Route path="/contact2" element={<><HeaderAfter/> </>} />
+         <Route path="/All-Jobs" element={<><HeaderAfter/><AllJobs/> </>} />
+         <Route path="/profile" element={<><HeaderAfter/><UserProfile/> </>} />
+         <Route path="/logout" element={<><HeaderAfter/><LogOut/> </>} />
+
 
 
 
          <Route path="/signin-admin" element={<><Header/><AdminSignup1/> </>} />
          <Route path="/admin-signin-second" element={<><Header/><AdminSignup/> </>} />
-
          <Route path="/login-admin" element={<><Header/><AdminLogin/> </>} />
 
          <Route path="/logined" element={<><AdminHeader/><AdminHome/> </>} />
          <Route path="/Category" element={<><AdminHeader/><AdminCategoryMainPage/> </>} />
          <Route path="/admin-job" element={<><AdminHeader/><AdminJobsPanel/> </>} />
          <Route path="/admin-user" element={<><AdminHeader/><AdminUsersPanel/> </>} />
+
+
+
+
          
 
          

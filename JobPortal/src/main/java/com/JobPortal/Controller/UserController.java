@@ -8,6 +8,7 @@ import com.JobPortal.Execption.PasswordValidationExecption;
 import com.JobPortal.Execption.UserSaveFailedException;
 import com.JobPortal.Model.*;
 import com.JobPortal.Repository.AddressRepository;
+import com.JobPortal.Repository.UserProfileRepository;
 import com.JobPortal.Repository.UserRepository;
 import com.JobPortal.Request.LoginRequest;
 import com.JobPortal.Request.ProfileRequest;
@@ -16,8 +17,13 @@ import com.JobPortal.Response.LoginResponse;
 import com.JobPortal.Response.ProfileResponse;
 import com.JobPortal.Response.UserResponse;
 import com.JobPortal.ServiceImpl.AddressServiceImpl;
+import com.JobPortal.ServiceImpl.UserProfileServiceImpl;
 import com.JobPortal.ServiceImpl.UserServiceImpl;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpSession;
 import jakarta.transaction.Transactional;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -44,6 +50,11 @@ public class UserController {
     private UserServiceImpl userService;
     @Autowired
     private UserRepository userRepository;
+    @Autowired
+    private UserProfileServiceImpl userProfileService;
+    @Autowired
+    private UserProfileRepository userProfileRepository;
+    private static final Logger LOG = LoggerFactory.getLogger(UserController.class);
 
     @PostMapping("/verify-otp")
     public boolean otp(@RequestBody Map<String, Object> result) {
@@ -89,20 +100,40 @@ public class UserController {
     public ResponseEntity<List<User>> fetchAllUser() {
         List<User>users= userRepository.findAll();
         return new ResponseEntity<>(users, HttpStatus.OK);
+    }@GetMapping("/email")
+    public ResponseEntity<String> getEmailFromJwt(@RequestHeader("Authorization") String jwt) {
+        jwt = jwt.substring(7);  // Remove "Bearer " prefix
+        String email = jwtUtils.extractUsername(jwt);
+        return ResponseEntity.ok(email);
     }
 
-    @PostMapping("/profile")
-    public ResponseEntity<ProfileResponse> addUserAddress(@RequestParam("bio") String bio, @RequestParam("website") String website, @RequestParam("linkedlnProfileLink") String linkedlnProfileLink, @RequestParam("githubProfileLink") String githubProfileLink, @RequestParam("resumeLink") MultipartFile resumeLink, @RequestParam("profilePicLink") MultipartFile profilePicLink, @RequestHeader("authorization") String jwt) throws IOException, UserSaveFailedException {
+
+    @PostMapping("/update/profile")
+    public ResponseEntity<ProfileResponse> updateUserProfile(
+            @RequestParam("bio") String bio,
+            @RequestParam("website") String website,
+            @RequestParam("linkedlnProfileLink") String linkedlnProfileLink,
+            @RequestParam("githubProfileLink") String githubProfileLink,
+            @RequestParam(value = "resumeLink", required = false) MultipartFile resumeLink,
+            @RequestParam(value = "profilePicLink", required = false) MultipartFile profilePicLink,
+            @RequestHeader("authorization") String jwt) throws IOException, UserSaveFailedException {
+
         ProfileRequest profile = new ProfileRequest();
         profile.setBio(bio);
         profile.setWebsite(website);
-        profile.setProfilePicLink(profilePicLink);
         profile.setLinkedlnProfileLink(linkedlnProfileLink);
         profile.setGithubProfileLink(githubProfileLink);
-        profile.setResumeLink(resumeLink);
+
+        if (resumeLink != null) {
+            profile.setResumeLink(resumeLink);
+        }
+        if (profilePicLink != null) {
+            profile.setProfilePicLink(profilePicLink);
+        }
+
         jwt = jwt.substring(7);
         String email = jwtUtils.extractUsername(jwt);
-        return userResources.addProfileTOuser(profile, email);
+        return userResources.updateUserProfile(profile, email);
     }
 
     @PostMapping("/update/skills")
@@ -158,6 +189,46 @@ public class UserController {
         }
         response.put("count", users.size());
         return  new ResponseEntity<>(response,HttpStatus.OK);
+    }
+    @GetMapping("/profile")
+    public UserProfile getUserProfile(@RequestHeader("authorization") String jwt){
+        jwt = jwt.substring(7);
+        String email = jwtUtils.extractUsername(jwt);
+        User user=userService.getUserByEmailid(email);
+        UserProfile profile = user.getProfile();
+        return profile;
+    }
+    @PutMapping("/update/profile")
+    public ResponseEntity<ProfileResponse> updateProfile(@ModelAttribute UserProfile userUrofile, @RequestHeader("authorization") String jwt) throws IOException, UserSaveFailedException {
+        ProfileResponse response = new ProfileResponse();
+        if (userUrofile==null){
+            return new ResponseEntity<>(response,HttpStatus.BAD_REQUEST);
+        }
+        jwt = jwt.substring(7);
+        String email = jwtUtils.extractUsername(jwt);
+        User user =userService.getUserByEmailid(email);
+        UserProfile profile = user.getProfile();
+        profile.setBio(userUrofile.getBio());
+        profile.setWebsite(userUrofile.getWebsite());
+        profile.setProfilePicLink(userUrofile.getProfilePic());
+        profile.setLinkedlnProfileLink(userUrofile.getLinkedlnProfileLink());
+        profile.setGithubProfileLink(userUrofile.getGithubProfileLink());
+        profile.setResumeLink(userUrofile.getResume());
+        user.setProfile(profile);
+        response.setUser(user);
+        response.setResponse("added ");
+        response.setSuccess(true);
+        return new ResponseEntity<>(response,HttpStatus.OK);
+    }
+
+    @PostMapping("/logout")
+    public ResponseEntity<String> logout(HttpServletRequest request) {
+        HttpSession session = request.getSession(false);
+        if (session != null) {
+            session.invalidate(); // Invalidate the session
+        }
+        LOG.info("logout successfully ");
+        return ResponseEntity.status(HttpStatus.OK).body("Logout successful");
     }
 
 
